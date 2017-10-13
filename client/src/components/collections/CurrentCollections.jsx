@@ -47,7 +47,6 @@ class CurrentCollections extends Component {
         <div key={_id}>
           <Link to={`/newcollection/${collectionName}/${_id}`}>
             <h3>Collection Title: {collectionName}</h3>
-            <h5>Category: {category}</h5>
           </Link>
           <Link to={`/newcollection/${collectionName}/${_id}/edit`} className="btn btn-warning">
             Edit
