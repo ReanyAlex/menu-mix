@@ -15,9 +15,9 @@ const InputContainer = styled.div`
 `;
 
 const RenderForm = ({ itemData, index, onChange }) => {
-  console.log('render');
   const FORM_OBJECT = [
     { label: 'Menu Item Name:', name: 'itemName', placeholder: '' },
+    { label: 'Category:', name: 'itemCategory', placeholder: '' },
     { label: 'Menu Item Cost:', name: 'itemCost', placeholder: '$' },
     { label: 'Menu Item Sales Price::', name: 'itemPrice', placeholder: '$' }
   ];

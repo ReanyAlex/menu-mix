@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 // import NewMenuItems from './NewMenuItems';
 import CurrentMenuItems from './CurrentMenuItems';
 
@@ -8,10 +7,7 @@ class MenuItems extends Component {
     return (
       <div>
         <div className="container">
-          <CurrentMenuItems />
-          <Link to="/newitems" className="btn btn-primary">
-            Add New Items
-          </Link>
+          <CurrentMenuItems style={{ float: 'left' }} />
         </div>
       </div>
     );

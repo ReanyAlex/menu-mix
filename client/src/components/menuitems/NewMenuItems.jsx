@@ -32,6 +32,7 @@ class NewMenuItems extends Component {
   state = {
     numberOfNewItems: 0,
     itemName: [''],
+    itemCategory: [''],
     itemCost: [''],
     itemPrice: ['']
   };
@@ -67,11 +68,11 @@ class NewMenuItems extends Component {
     event.preventDefault();
     const itemObjectArray = [];
     const url = '/api/item';
-    const { itemName, itemCost, itemPrice } = this.state;
+    const { itemName, itemCategory, itemCost, itemPrice } = this.state;
 
     itemObjectArray.push(
       this.state.itemName.map((itemInfo, i) => {
-        return { itemName: itemName[i], itemCost: itemCost[i], itemPrice: itemPrice[i] };
+        return { itemName: itemName[i], itemCategory: itemCategory[i], itemCost: itemCost[i], itemPrice: itemPrice[i] };
       })
     );
 
@@ -79,10 +80,9 @@ class NewMenuItems extends Component {
   }
 
   render() {
-    console.log(this.state);
     return (
-      <div className="new-menu-item-div">
-        <h1>Add New Menu Items</h1>
+      <div className="container">
+        <h3>Add New Menu Items:</h3>
         <form onSubmit={this.handleSubmit.bind(this)}>
           {this.renderForm()}
           <Button type="submit" />

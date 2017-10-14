@@ -64,7 +64,7 @@ class DetailedCollection extends Component {
     const avgCostReduced = avgCostArray.reduce((a, b) => a + b, 0);
 
     const avgCost = avgCostReduced / itemsSoldTotal / 100;
-    return avgCost.toFixed(2);
+    return avgCost;
   }
 
   categorizingHighLow(itemValue, compare) {
@@ -120,14 +120,14 @@ class DetailedCollection extends Component {
       const { _id, collectionName, category, items } = collection;
       const avgCost = this.avgPriceOrCost(items, 'cost');
       const avgPrice = this.avgPriceOrCost(items, 'price');
-      const avgContributionMargin = (avgPrice - avgCost).toFixed(2);
+      const avgContributionMargin = avgPrice - avgCost;
 
       let TOTAL_EQUATIONS = [
         `${itemsSoldTotal}`,
-        `$${avgCost}`,
-        `$${avgPrice}`,
+        `$${avgCost.toFixed(2)}`,
+        `$${avgPrice.toFixed(2)}`,
         `${(avgCost / avgPrice * 100).toFixed(2)}%`,
-        `$${avgContributionMargin}`,
+        `$${avgContributionMargin.toFixed(2)}`,
         `$${(itemsSoldTotal * avgCost).toFixed(2)}`,
         `$${(itemsSoldTotal * avgPrice).toFixed(2)}`,
         `$${(itemsSoldTotal * (avgPrice - avgCost)).toFixed(2)}`

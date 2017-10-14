@@ -1,16 +1,31 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 import EditItemForm from './EditItemForm';
 
 const ItemHeaders = styled.span`
+  text-decoration: underline;
+  width: 8rem;
   display: inline-block;
-  margin-right: 20px;
-  font-size: 1.5rem;
+  margin-right: 0.5rem;
+  font-size: 1.25rem;
 `;
 
-const Button = styled.button`margin-right: 10px;`;
+const ItemValues = styled.span`
+  width: 8rem;
+  display: inline-block;
+  margin-right: 0.5rem;
+  font-size: 1.25rem;
+`;
+
+const Button = styled.button`
+  margin-right: 10px;
+  display: inline-block;
+`;
+
+// const ButtonContainer = styled.button`display: inline-block`;
 
 class CurrentMenuItems extends Component {
   state = {
@@ -53,7 +68,7 @@ class CurrentMenuItems extends Component {
   renderButtons(_id) {
     if (this.props.from === 'Collection') {
       return (
-        <div>
+        <span>
           {this.props.itemsToCollection.indexOf(_id) === -1 ? (
             <Button
               className="btn btn-warning"
@@ -73,12 +88,12 @@ class CurrentMenuItems extends Component {
               Remove
             </Button>
           )}
-        </div>
+        </span>
       );
     }
 
     return (
-      <div>
+      <span style={{ position: 'absolute', right: '-.5rem', bottom: '.25rem' }}>
         <Button
           className="btn btn-warning"
           onClick={() => {
@@ -90,26 +105,29 @@ class CurrentMenuItems extends Component {
         <Button className="btn btn-danger" onClick={() => this.handleDelete(_id)}>
           Delete
         </Button>
-      </div>
+      </span>
     );
   }
 
-  showItemDiv({ _id, name, cost, price }) {
+  showItemDiv({ _id, name, category, cost, price }, i) {
+    let style;
+    const ITEM_VALUES = [
+      name,
+      category,
+      `$${(cost / 100).toFixed(2)}`,
+      `$${(price / 100).toFixed(2)}`,
+      `${(cost / price * 100).toFixed(2)}%`
+    ];
+
+    if (i % 2) {
+      style = { background: 'lightgrey', padding: '.5rem', position: 'relative' };
+    } else {
+      style = { padding: '.5rem', position: 'relative' };
+    }
+
     return (
-      <div key={_id}>
-        <p>
-          {[
-            ['Name: ', name],
-            ['Cost: $', cost / 100],
-            ['Sell Price: $', price / 100],
-            ['Item Cost: ', `${(cost / price * 100).toFixed(2)}%`]
-          ].map(header => (
-            <ItemHeaders key={header[0]}>
-              {header[0]}
-              {header[1]}
-            </ItemHeaders>
-          ))}
-        </p>
+      <div key={_id} style={style}>
+        {ITEM_VALUES.map(value => <ItemValues key={value}>{value}</ItemValues>)}
         {this.renderButtons(_id)}
       </div>
     );
@@ -121,27 +139,41 @@ class CurrentMenuItems extends Component {
   }
 
   renderItems() {
+    const HEADER_VALUES = ['Name', 'Category', 'Cost', 'Sell Price', 'Item Cost'];
     const that = this;
     if (this.state.currentItemData.length === 0) {
       return;
     }
 
-    return this.state.currentItemData.map(item => {
-      if (item._id === this.state.editId) {
-        return <EditItemForm key={item._id} item={item} finishedEdit={this.finishedEdit.bind(this)} />;
-      }
-      return that.showItemDiv(item);
-    });
+    return (
+      <div>
+        {HEADER_VALUES.map(value => (
+          <ItemHeaders style={{ paddingLeft: '.5rem' }} key={value}>
+            {value}
+          </ItemHeaders>
+        ))}
+
+        {this.state.currentItemData.map((item, i) => {
+          if (item._id === this.state.editId) {
+            return <EditItemForm key={item._id} item={item} finishedEdit={this.finishedEdit.bind(this)} />;
+          }
+          return that.showItemDiv(item, i);
+        })}
+      </div>
+    );
   }
 
   render() {
     return (
       <div>
         <h4>Current menu items:</h4>
-        {/* <form onSubmit={e => e.preventDefault()}> */}
         <input type="text" placeholder="Search" aria-label="Search" onChange={e => this.updateSearch(e.target.value)} />
-        {/* </form> */}
         {this.renderItems()}
+        <div>
+          <Link to="/newitems" className="btn btn-primary">
+            Add New Items
+          </Link>
+        </div>
       </div>
     );
   }

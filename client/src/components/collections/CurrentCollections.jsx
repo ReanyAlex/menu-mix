@@ -17,7 +17,7 @@ class CurrentCollections extends Component {
     const url = '/api/collection';
 
     axios.get(url).then(res => {
-      if (res.data === []) {
+      if (res.data.length === 0) {
         return;
       }
 
@@ -44,17 +44,29 @@ class CurrentCollections extends Component {
       const { _id, collectionName, category } = collection;
 
       return (
-        <div key={_id}>
-          <Link to={`/newcollection/${collectionName}/${_id}`}>
-            <h3>Collection Title: {collectionName}</h3>
-            <h5>Category: {category}</h5>
-          </Link>
-          <Link to={`/newcollection/${collectionName}/${_id}/edit`} className="btn btn-warning">
-            Edit
-          </Link>
-          <button style={{ marginLeft: '2rem' }} className="btn btn-danger" onClick={() => this.handleDelete(_id)}>
-            Delete
-          </button>
+        <div key={_id} style={{ padding: '.5rem', margin: '.25rem 0 0 0', background: 'lightgrey' }}>
+          <div style={{ marginTop: '.25rem' }}>
+            <Link to={`/newcollection/${collectionName}/${_id}`} style={{ display: 'inline-block' }}>
+              <h3>Collection Title: {collectionName}</h3>
+            </Link>
+
+            <span style={{ float: 'right' }}>
+              <Link
+                to={`/newcollection/${collectionName}/${_id}/edit`}
+                className="btn btn-warning"
+                style={{ display: 'inline-block', height: '100%' }}
+              >
+                Edit
+              </Link>
+              <button
+                style={{ margin: '0 1rem 0 1rem' }}
+                className="btn btn-danger"
+                onClick={() => this.handleDelete(_id)}
+              >
+                Delete
+              </button>
+            </span>
+          </div>
         </div>
       );
     });
@@ -66,7 +78,7 @@ class CurrentCollections extends Component {
         <div className="container">
           <h3>Current Collections:</h3>
           {this.renderCollections()}
-          <Link to="/newcollection" className="btn btn-primary">
+          <Link to="/newcollection" className="btn btn-primary" style={{ marginTop: '2rem' }}>
             Create New Collection
           </Link>
         </div>

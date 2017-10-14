@@ -3,30 +3,29 @@ const Collections = mongoose.model('collections');
 
 module.exports = {
   create(req, res, next) {
-    console.log('Create a new Collection');
+    const owner = req.session.passport.user;
     // console.log(req.body);
     const { collectionName, category, items } = req.body;
-
-    const newCollection = new Collections({ collectionName, category, items });
-    console.log('new collection', newCollection);
+    const newCollection = new Collections({ collectionName, category, items, owner });
     newCollection.save();
     res.redirect('/');
   },
 
   index(req, res, next) {
-    console.log('index');
     let searchQuery;
+    const owner = req.session.passport.user;
     const { search, id } = req.query;
 
     if (id === undefined) {
-      searchQuery = { collectionName: new RegExp(search, 'i') };
+      searchQuery = { collectionName: new RegExp(search, 'i'), owner };
     } else {
-      searchQuery = { _id: id };
+      searchQuery = { _id: id, owner };
     }
-
     Collections.find(searchQuery)
       .populate('items')
-      .then(collections => res.send(collections))
+      .then(collections => {
+        res.send(collections);
+      })
       .catch(next);
   },
 
@@ -36,7 +35,6 @@ module.exports = {
     Collections.findByIdAndUpdate(id, { $set: itemProps })
       .then(() => Collections.findById(id))
       .then(item => {
-        console.log(item);
         res.send(item);
       })
       .catch(next);

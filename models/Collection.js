@@ -9,7 +9,8 @@ const collection = new Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'menuItem'
     }
-  ]
+  ],
+  owner: String
 });
 
 mongoose.model('collections', collection);

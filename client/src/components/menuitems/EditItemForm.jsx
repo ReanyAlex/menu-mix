@@ -22,15 +22,17 @@ class EditItemForm extends Component {
   state = {
     _id: '',
     itemName: [''],
+    itemCategory: [''],
     itemCost: [''],
     itemPrice: ['']
   };
 
   componentDidMount() {
-    const { _id, name, cost, price } = this.props.item;
+    const { _id, name, category, cost, price } = this.props.item;
     this.setState({
       _id,
       itemName: [name],
+      itemCategory: [category],
       itemCost: [cost / 100],
       itemPrice: [price / 100]
     });
@@ -65,7 +67,6 @@ class EditItemForm extends Component {
     const price = this.state.itemPrice[0] * 100;
 
     const itemObject = { name, cost, price };
-    console.log(itemObject);
     axios.put(url, itemObject).then(() => this.props.finishedEdit());
   }
 
