@@ -106,7 +106,7 @@ class NewCollection extends Component {
           <Input
             required
             type="text"
-            value={this.state.collectionName}
+            value={this.state[value]}
             onChange={e => this.setState({ [value]: e.target.value })}
             name={value}
             id={value}
