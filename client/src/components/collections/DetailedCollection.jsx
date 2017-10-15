@@ -4,6 +4,7 @@ import axios from 'axios';
 import styled from 'styled-components';
 
 const TableData = styled.td`
+  white-space: nowrap;
   border: solid 1px gray;
   margin: 0 0.5rem;
   font-size: 1em;

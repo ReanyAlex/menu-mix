@@ -10,6 +10,7 @@ const Nav = styled.nav`
   font-family: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
   background-color: lightblue;
   border-bottom: 1px solid lightgray;
+  margin-bottom: 2rem;
 `;
 const HeaderItem = styled.span`
   color: gray;
