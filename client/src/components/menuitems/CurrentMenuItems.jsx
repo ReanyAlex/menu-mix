@@ -11,6 +11,7 @@ const ItemHeaders = styled.span`
   display: inline-block;
   margin-right: 0.5rem;
   font-size: 1.25rem;
+  padding-left: 0.5rem;
 `;
 
 const ItemValues = styled.span`
@@ -25,6 +26,12 @@ const ItemValues = styled.span`
   &:hover {
     white-space: normal;
   }
+`;
+
+const ButtonContainer = styled.span`
+  position: absolute;
+  right: -0.5rem;
+  bottom: 0.25rem;
 `;
 
 const Button = styled.button`
@@ -77,11 +84,7 @@ class CurrentMenuItems extends Component {
   renderHeader() {
     const HEADER_VALUES = ['Name', 'Category', 'Cost', 'Sell Price', 'Item Cost'];
 
-    return HEADER_VALUES.map(value => (
-      <ItemHeaders style={{ paddingLeft: '.5rem' }} key={value}>
-        {value}
-      </ItemHeaders>
-    ));
+    return HEADER_VALUES.map(value => <ItemHeaders key={value}>{value}</ItemHeaders>);
   }
 
   renderRows() {
@@ -128,7 +131,7 @@ class CurrentMenuItems extends Component {
 
     if (from === 'Collection') {
       return (
-        <span style={{ position: 'absolute', right: '-.5rem', bottom: '.25rem' }}>
+        <ButtonContainer>
           {itemsToCollection.indexOf(_id) === -1 ? (
             <Button className="btn btn-warning" onClick={e => addItemsToCollection(_id, e)}>
               Add
@@ -138,19 +141,19 @@ class CurrentMenuItems extends Component {
               Remove
             </Button>
           )}
-        </span>
+        </ButtonContainer>
       );
     }
 
     return (
-      <span style={{ position: 'absolute', right: '-.5rem', bottom: '.25rem' }}>
+      <ButtonContainer>
         <Button className="btn btn-warning" onClick={() => this.setState({ editId: _id })}>
           Edit
         </Button>
         <Button className="btn btn-danger" onClick={() => this.handleDelete(_id)}>
           Delete
         </Button>
-      </span>
+      </ButtonContainer>
     );
   }
 

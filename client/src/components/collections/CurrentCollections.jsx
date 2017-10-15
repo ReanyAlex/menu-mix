@@ -1,7 +1,21 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-// import styled from 'styled-components';
+import styled from 'styled-components';
+
+const CollectionHolder = styled.div`
+  padding: 0.5rem;
+  margin: 0.25rem 0 0 0;
+  background: lightgrey;
+`;
+
+const FloatRightSpan = styled.span`float: right;`;
+
+const DeleteButton = styled.button`margin: 0 1rem 0 1rem;`;
+
+const CollectionLink = styled(Link)`display: inline-block;`;
+
+const NewCollectionLink = styled(Link)`margin-top: 2rem;`;
 
 class CurrentCollections extends Component {
   state = {
@@ -45,28 +59,20 @@ class CurrentCollections extends Component {
       const ROOT_PATH = `/newcollection/${collectionName}/${_id}`;
 
       return (
-        <div key={_id} style={{ padding: '.5rem', margin: '.25rem 0 0 0', background: 'lightgrey' }}>
-          <Link to={ROOT_PATH} style={{ display: 'inline-block' }}>
+        <CollectionHolder key={_id}>
+          <CollectionLink to={ROOT_PATH}>
             <h3>Collection Title: {collectionName}</h3>
-          </Link>
+          </CollectionLink>
 
-          <span style={{ float: 'right' }}>
-            <Link
-              to={`${ROOT_PATH}/edit`}
-              className="btn btn-warning"
-              style={{ display: 'inline-block', height: '100%' }}
-            >
+          <FloatRightSpan>
+            <Link to={`${ROOT_PATH}/edit`} className="btn btn-warning">
               Edit
             </Link>
-            <button
-              style={{ margin: '0 1rem 0 1rem' }}
-              className="btn btn-danger"
-              onClick={() => this.handleDelete(_id)}
-            >
+            <DeleteButton className="btn btn-danger" onClick={() => this.handleDelete(_id)}>
               Delete
-            </button>
-          </span>
-        </div>
+            </DeleteButton>
+          </FloatRightSpan>
+        </CollectionHolder>
       );
     });
   }
@@ -77,9 +83,9 @@ class CurrentCollections extends Component {
         <div className="container">
           <h3>Current Collections:</h3>
           {this.renderCollections()}
-          <Link to="/newcollection" className="btn btn-primary" style={{ marginTop: '2rem' }}>
+          <NewCollectionLink to="/newcollection" className="btn btn-primary">
             Create New Collection
-          </Link>
+          </NewCollectionLink>
         </div>
       </div>
     );
