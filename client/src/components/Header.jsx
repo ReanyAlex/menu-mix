@@ -36,7 +36,7 @@ const HeaderLogo = styled.span`
   }
 `;
 
-// const LastHeaderItem = styled.li`margin-right: 2rem;`;
+const LastHeaderItem = styled.li`margin-right: 2rem;`;
 
 class Header extends Component {
   renderContent() {
@@ -44,7 +44,7 @@ class Header extends Component {
       { type: '', path: '/items', displayed: 'Items' },
       { type: '', path: '/collections', displayed: 'Collections' },
       { type: '', path: '/settings', displayed: 'Settings' },
-      { type: '', path: '/api/logout', displayed: 'Logout' }
+      { type: 'last', path: '/api/logout', displayed: 'Logout' }
     ];
 
     switch (this.props.auth) {
@@ -60,7 +60,17 @@ class Header extends Component {
         );
       default:
         return HEADER_LINKS.map(links => {
-          const { path, displayed } = links;
+          const { type, path, displayed } = links;
+
+          if (type === 'last') {
+            return (
+              <LastHeaderItem key={path} className="nav-item padding-right">
+                <a href={path} className="nav-link">
+                  <HeaderItem>{displayed}</HeaderItem>
+                </a>
+              </LastHeaderItem>
+            );
+          }
 
           return (
             <li key={path} className="nav-item">
