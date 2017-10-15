@@ -57,6 +57,7 @@ class DetailedCollection extends Component {
     this.setState({ itemsSoldTotal, numItemsSoldArray });
   }
 
+  //Equations for the chart
   avgPriceOrCost(items, category) {
     const avgCostArray = [];
     const { numItemsSoldArray, itemsSoldTotal } = this.state;
@@ -75,18 +76,6 @@ class DetailedCollection extends Component {
     }
   }
 
-  itemAmountInput(collectionName, name, nestedItem) {
-    return (
-      <input
-        style={{ width: '5rem' }}
-        min="0"
-        type="number"
-        value={nestedItem}
-        onChange={e => this.handleNumberOfItemsSold(collectionName, e.target.value, name)}
-      />
-    );
-  }
-
   menuCategory(profit, popularity) {
     if ((profit === 'High') & (popularity === 'High')) {
       return 'Star';
@@ -98,8 +87,37 @@ class DetailedCollection extends Component {
       return 'Dog';
     }
   }
+  //Equations for the chart above
 
   renderCollections() {
+    return this.state.collectionsData.map(collection => {
+      const { _id, collectionName, category } = collection;
+
+      return (
+        <div key={_id}>
+          <h3>Collection Title: {collectionName}</h3>
+          <h5>Category: {category}</h5>
+          {this.renderTable(collection)}
+        </div>
+      );
+    });
+  }
+
+  renderTable(collection) {
+    const { _id } = collection;
+
+    return (
+      <table key={_id}>
+        {this.renderTableHeader()}
+        <tbody>
+          {this.renderItemRow(collection)}
+          {this.renderTotalRow(collection)}
+        </tbody>
+      </table>
+    );
+  }
+
+  renderTableHeader() {
     const TABLE_HEADER = [
       'Item Name',
       '# Sold',
@@ -115,81 +133,95 @@ class DetailedCollection extends Component {
       'Menu - category'
     ];
 
-    return this.state.collectionsData.map(collection => {
-      const { itemSoldObject, itemsSoldTotal, numItemsSoldArray } = this.state;
-      const { _id, collectionName, category, items } = collection;
-      const avgCost = this.avgPriceOrCost(items, 'cost');
-      const avgPrice = this.avgPriceOrCost(items, 'price');
-      const avgContributionMargin = avgPrice - avgCost;
+    return (
+      <thead>
+        <tr>{TABLE_HEADER.map(header => <th key={header}>{header}</th>)}</tr>
+      </thead>
+    );
+  }
 
-      let TOTAL_EQUATIONS = [
-        `${itemsSoldTotal}`,
-        `$${avgCost.toFixed(2)}`,
-        `$${avgPrice.toFixed(2)}`,
-        `${(avgCost / avgPrice * 100).toFixed(2)}%`,
-        `$${avgContributionMargin.toFixed(2)}`,
-        `$${(itemsSoldTotal * avgCost).toFixed(2)}`,
-        `$${(itemsSoldTotal * avgPrice).toFixed(2)}`,
-        `$${(itemsSoldTotal * (avgPrice - avgCost)).toFixed(2)}`
+  renderItemRow({ collectionName, items }) {
+    const { itemSoldObject, itemsSoldTotal, numItemsSoldArray } = this.state;
+    // const { collectionName, items } = collection;
+    const avgCost = this.avgPriceOrCost(items, 'cost');
+    const avgPrice = this.avgPriceOrCost(items, 'price');
+    const avgContributionMargin = avgPrice - avgCost;
+
+    return items.map((item, i) => {
+      const { _id, name, cost, price } = item;
+      const contributionMargin = (price - cost) / 100;
+      const nestedItem = itemSoldObject[collectionName][name];
+      const profitRank = this.categorizingHighLow(contributionMargin, avgContributionMargin);
+      const popularityRank = this.categorizingHighLow(numItemsSoldArray[i], itemsSoldTotal / numItemsSoldArray.length);
+
+      const ITEM_EQUATIONS = [
+        name,
+        this.itemAmountInput(collectionName, name, nestedItem),
+        `$${cost / 100}`,
+        `$${price / 100}`,
+        `${(cost / price * 100).toFixed(2)}%`,
+        `$${contributionMargin}`,
+        `$${(nestedItem * (cost / 100)).toFixed(2)}`,
+        `$${(nestedItem * (price / 100)).toFixed(2)}`,
+        `$${(nestedItem * ((price - cost) / 100)).toFixed(2)}`,
+        profitRank,
+        popularityRank,
+        this.menuCategory(profitRank, popularityRank)
       ];
 
-      return (
-        <div key={_id}>
-          <h3>Collection Title: {collectionName}</h3>
-          <h5>Category: {category}</h5>
-          <table key={_id}>
-            <thead>
-              <tr>{TABLE_HEADER.map(header => <th key={header}>{header}</th>)}</tr>
-            </thead>
-            <tbody>
-              {items.map((item, i) => {
-                const { _id, name, cost, price } = item;
-                let contributionMargin = (price - cost) / 100;
-                let nestedItem = itemSoldObject[collectionName][name];
-                let profitRank = this.categorizingHighLow(contributionMargin, avgContributionMargin);
-                let popularityRank = this.categorizingHighLow(
-                  numItemsSoldArray[i],
-                  itemsSoldTotal / numItemsSoldArray.length
-                );
-
-                let ITEM_EQUATIONS = [
-                  name,
-                  this.itemAmountInput(collectionName, name, nestedItem),
-                  `$${cost / 100}`,
-                  `$${price / 100}`,
-                  `${(cost / price * 100).toFixed(2)}%`,
-                  `$${contributionMargin}`,
-                  `$${(nestedItem * (cost / 100)).toFixed(2)}`,
-                  `$${(nestedItem * (price / 100)).toFixed(2)}`,
-                  `$${(nestedItem * ((price - cost) / 100)).toFixed(2)}`,
-                  profitRank,
-                  popularityRank,
-                  this.menuCategory(profitRank, popularityRank)
-                ];
-
-                return (
-                  <tr key={_id}>{ITEM_EQUATIONS.map((equation, i) => <TableData key={i}>{equation}</TableData>)}</tr>
-                );
-              })}
-
-              <tr>
-                <TableData style={{ background: 'lightgrey' }} />
-                {TOTAL_EQUATIONS.map((equation, i) => <TableData key={i}>{equation}</TableData>)}
-                <TableData colSpan={3} style={{ background: 'lightgrey' }} />
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      );
+      return <tr key={_id}>{ITEM_EQUATIONS.map((equation, i) => <TableData key={i}>{equation}</TableData>)}</tr>;
     });
   }
 
-  render() {
+  itemAmountInput(collectionName, name, nestedItem) {
     return (
-      <div>
-        <div className="container">{this.renderCollections()}</div>
-      </div>
+      <input
+        style={{ width: '5rem' }}
+        min="0"
+        type="number"
+        value={nestedItem}
+        onChange={e => this.handleNumberOfItemsSold(collectionName, e.target.value, name)}
+      />
     );
+  }
+
+  renderTotalRow({ items }) {
+    const { itemsSoldTotal } = this.state;
+    const avgCost = this.avgPriceOrCost(items, 'cost');
+    const avgPrice = this.avgPriceOrCost(items, 'price');
+    const avgContributionMargin = avgPrice - avgCost;
+
+    const TOTAL_EQUATIONS = [
+      ['', `${itemsSoldTotal}`, ''],
+      ['$', `${avgCost.toFixed(2)}`, ''],
+      ['$', `${avgPrice.toFixed(2)}`, ''],
+      ['', `${(avgCost / avgPrice * 100).toFixed(2)}`, '%'],
+      ['$', `${avgContributionMargin.toFixed(2)}`, ''],
+      ['$', `${(itemsSoldTotal * avgCost).toFixed(2)}`, ''],
+      ['$', `${(itemsSoldTotal * avgPrice).toFixed(2)}`, ''],
+      ['$', `${(itemsSoldTotal * (avgPrice - avgCost)).toFixed(2)}`, '']
+    ];
+
+    return (
+      <tr>
+        <TableData style={{ background: 'lightgrey' }} />
+        {TOTAL_EQUATIONS.map((equation, i) => {
+          console.log(isNaN(equation[1]));
+          return (
+            <TableData key={i}>
+              {equation[0]}
+              {!isNaN(equation[1]) ? equation[1] : '0.00'}
+              {equation[2]}
+            </TableData>
+          );
+        })}
+        <TableData colSpan={3} style={{ background: 'lightgrey' }} />
+      </tr>
+    );
+  }
+
+  render() {
+    return <div className="container">{this.renderCollections()}</div>;
   }
 }
 

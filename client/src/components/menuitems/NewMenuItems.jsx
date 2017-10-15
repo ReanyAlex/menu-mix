@@ -31,10 +31,10 @@ const NewItemButton = styled.button`
 class NewMenuItems extends Component {
   state = {
     numberOfNewItems: 0,
-    itemName: [''],
-    itemCategory: [''],
-    itemCost: [''],
-    itemPrice: ['']
+    name: [''],
+    category: [''],
+    cost: [''],
+    price: ['']
   };
 
   addOneNewItem() {
@@ -68,11 +68,11 @@ class NewMenuItems extends Component {
     event.preventDefault();
     const itemObjectArray = [];
     const url = '/api/item';
-    const { itemName, itemCategory, itemCost, itemPrice } = this.state;
+    const { name, category, cost, price } = this.state;
 
     itemObjectArray.push(
-      this.state.itemName.map((itemInfo, i) => {
-        return { itemName: itemName[i], itemCategory: itemCategory[i], itemCost: itemCost[i], itemPrice: itemPrice[i] };
+      name.map((itemInfo, i) => {
+        return { itemName: name[i], itemCategory: category[i], itemCost: cost[i], itemPrice: price[i] };
       })
     );
 

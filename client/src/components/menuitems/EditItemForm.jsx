@@ -21,20 +21,20 @@ const Button = styled.input`
 class EditItemForm extends Component {
   state = {
     _id: '',
-    itemName: [''],
-    itemCategory: [''],
-    itemCost: [''],
-    itemPrice: ['']
+    name: [''],
+    category: [''],
+    cost: [''],
+    price: ['']
   };
 
   componentDidMount() {
     const { _id, name, category, cost, price } = this.props.item;
     this.setState({
       _id,
-      itemName: [name],
-      itemCategory: [category],
-      itemCost: [cost / 100],
-      itemPrice: [price / 100]
+      name: [name],
+      category: [category],
+      cost: [cost / 100],
+      price: [price / 100]
     });
   }
   addOneNewItem() {
@@ -60,11 +60,12 @@ class EditItemForm extends Component {
   //needs to be  changed for edit
   handleSubmit(event) {
     event.preventDefault();
+    let { name, cost, price } = this.state;
     //matching MenuItem model
     const url = `/api/item/${this.state._id}`;
-    const name = this.state.itemName[0];
-    const cost = this.state.itemCost[0] * 100;
-    const price = this.state.itemPrice[0] * 100;
+    name = name[0];
+    cost = cost[0] * 100;
+    price = price[0] * 100;
 
     const itemObject = { name, cost, price };
     axios.put(url, itemObject).then(() => this.props.finishedEdit());
@@ -72,12 +73,10 @@ class EditItemForm extends Component {
 
   render() {
     return (
-      <div className="new-menu-item-div">
-        <form onSubmit={this.handleSubmit.bind(this)}>
-          {this.renderForm()}
-          <Button type="submit" />
-        </form>
-      </div>
+      <form onSubmit={this.handleSubmit.bind(this)}>
+        {this.renderForm()}
+        <Button type="submit" />
+      </form>
     );
   }
 }

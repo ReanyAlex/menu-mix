@@ -36,10 +36,17 @@ const HeaderLogo = styled.span`
   }
 `;
 
-const LastHeaderItem = styled.li`margin-right: 2rem;`;
+// const LastHeaderItem = styled.li`margin-right: 2rem;`;
 
 class Header extends Component {
   renderContent() {
+    const HEADER_LINKS = [
+      { type: '', path: '/items', displayed: 'Items' },
+      { type: '', path: '/collections', displayed: 'Collections' },
+      { type: '', path: '/settings', displayed: 'Settings' },
+      { type: '', path: '/api/logout', displayed: 'Logout' }
+    ];
+
     switch (this.props.auth) {
       case null:
         return;
@@ -52,28 +59,17 @@ class Header extends Component {
           </li>
         );
       default:
-        return [
-          <li key="1" className="nav-item">
-            <Link to="/items" className="nav-link ">
-              <HeaderItem>Items</HeaderItem>
-            </Link>
-          </li>,
-          <li key="2" className="nav-item">
-            <Link to="/collections" className="nav-link">
-              <HeaderItem>Collections</HeaderItem>
-            </Link>
-          </li>,
-          <li key="3" className="nav-item">
-            <Link to="/settings" className="nav-link">
-              <HeaderItem>Settings</HeaderItem>
-            </Link>
-          </li>,
-          <LastHeaderItem key="4" className="nav-item padding-right">
-            <a href="/api/logout" className="nav-link">
-              <HeaderItem>Logout</HeaderItem>
-            </a>
-          </LastHeaderItem>
-        ];
+        return HEADER_LINKS.map(links => {
+          const { path, displayed } = links;
+
+          return (
+            <li key={path} className="nav-item">
+              <Link to={path} className="nav-link ">
+                <HeaderItem>{displayed}</HeaderItem>
+              </Link>
+            </li>
+          );
+        });
     }
   }
 

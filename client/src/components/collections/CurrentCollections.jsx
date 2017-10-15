@@ -41,32 +41,31 @@ class CurrentCollections extends Component {
 
   renderCollections() {
     return this.state.collectionsData.map(collection => {
-      const { _id, collectionName, category } = collection;
+      const { _id, collectionName } = collection;
+      const ROOT_PATH = `/newcollection/${collectionName}/${_id}`;
 
       return (
         <div key={_id} style={{ padding: '.5rem', margin: '.25rem 0 0 0', background: 'lightgrey' }}>
-          <div style={{ marginTop: '.25rem' }}>
-            <Link to={`/newcollection/${collectionName}/${_id}`} style={{ display: 'inline-block' }}>
-              <h3>Collection Title: {collectionName}</h3>
-            </Link>
+          <Link to={ROOT_PATH} style={{ display: 'inline-block' }}>
+            <h3>Collection Title: {collectionName}</h3>
+          </Link>
 
-            <span style={{ float: 'right' }}>
-              <Link
-                to={`/newcollection/${collectionName}/${_id}/edit`}
-                className="btn btn-warning"
-                style={{ display: 'inline-block', height: '100%' }}
-              >
-                Edit
-              </Link>
-              <button
-                style={{ margin: '0 1rem 0 1rem' }}
-                className="btn btn-danger"
-                onClick={() => this.handleDelete(_id)}
-              >
-                Delete
-              </button>
-            </span>
-          </div>
+          <span style={{ float: 'right' }}>
+            <Link
+              to={`${ROOT_PATH}/edit`}
+              className="btn btn-warning"
+              style={{ display: 'inline-block', height: '100%' }}
+            >
+              Edit
+            </Link>
+            <button
+              style={{ margin: '0 1rem 0 1rem' }}
+              className="btn btn-danger"
+              onClick={() => this.handleDelete(_id)}
+            >
+              Delete
+            </button>
+          </span>
         </div>
       );
     });

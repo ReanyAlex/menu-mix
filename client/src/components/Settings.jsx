@@ -49,11 +49,44 @@ class Settings extends Component {
 
   handleChange(event) {
     const state = this.state;
-    console.log(event.target.name);
-    console.log(event.target.value);
 
     state[event.target.name] = event.target.value;
     this.setState(state);
+  }
+
+  renderFormFeilds() {
+    console.log('render');
+    const FORM_DATA = [
+      { type: 'text', value: 'companyName', displayed: 'Company' },
+      { type: 'text', value: 'phoneNumber', displayed: 'Phone Number' },
+      { type: 'textarea', value: 'address', displayed: 'Address' }
+    ];
+
+    return FORM_DATA.map(data => {
+      const { type, value, displayed } = data;
+      if (type === 'textarea') {
+        return (
+          <fieldset key={value}>
+            <Label for="address">{displayed}:</Label>
+            <TextArea
+              onChange={e => this.handleChange(e)}
+              rows="10"
+              cols="40"
+              name={value}
+              id={value}
+              value={this.state[value]}
+            />
+          </fieldset>
+        );
+      }
+
+      return (
+        <fieldset key={value}>
+          <Label for={value}>{displayed}:</Label>
+          <Input onChange={e => this.handleChange(e)} type="text" name={value} id={value} value={this.state[value]} />
+        </fieldset>
+      );
+    });
   }
 
   render() {
@@ -61,32 +94,7 @@ class Settings extends Component {
       <div>
         <div className="container">
           <form action="/api/edit/settings" method="PUT">
-            <Label for="companyName">Company:</Label>
-            <Input
-              onChange={e => this.handleChange(e)}
-              type="text"
-              name="companyName"
-              id="companyName"
-              value={this.state.companyName}
-            />
-            <Label for="phoneNumber">Phone Number:</Label>
-            <Input
-              onChange={e => this.handleChange(e)}
-              type="text"
-              name="phoneNumber"
-              id="phoneNumber"
-              value={this.state.phoneNumber}
-            />
-            <Label for="address">Address:</Label>
-            <TextArea
-              onChange={e => this.handleChange(e)}
-              rows="10"
-              cols="40"
-              type="text"
-              name="address"
-              id="address"
-              value={this.state.address}
-            />
+            {this.renderFormFeilds()}
             <br />
             <Button type="submit" value="Submit" />
           </form>

@@ -16,10 +16,10 @@ const InputContainer = styled.div`
 
 const RenderForm = ({ itemData, index, onChange }) => {
   const FORM_OBJECT = [
-    { label: 'Menu Item Name:', name: 'itemName', placeholder: '' },
-    { label: 'Category:', name: 'itemCategory', placeholder: '' },
-    { label: 'Menu Item Cost:', name: 'itemCost', placeholder: '$' },
-    { label: 'Menu Item Sales Price::', name: 'itemPrice', placeholder: '$' }
+    { label: 'Menu Item Name:', name: 'name', placeholder: '' },
+    { label: 'Category:', name: 'category', placeholder: '' },
+    { label: 'Menu Item Cost:', name: 'cost', placeholder: '$' },
+    { label: 'Menu Item Sales Price::', name: 'price', placeholder: '$' }
   ];
 
   return FORM_OBJECT.map(form => {

@@ -91,32 +91,37 @@ class NewCollection extends Component {
       : axios.post(url, collectionHeader).then(() => this.props.history.push('/collections'));
   }
 
+  renderInputs() {
+    const NEWCOLLECTION_INPUTS = [
+      { value: 'collectionName', displayed: 'New Collection Name:' },
+      { value: 'category', displayed: 'New Collection category:' }
+    ];
+
+    return NEWCOLLECTION_INPUTS.map(input => {
+      const { value, displayed } = input;
+
+      return (
+        <CollectionInputContainer key={value}>
+          <Label for={value}>{displayed}</Label>
+          <Input
+            required
+            type="text"
+            value={this.state.collectionName}
+            onChange={e => this.setState({ [value]: e.target.value })}
+            name={value}
+            id={value}
+          />
+        </CollectionInputContainer>
+      );
+    });
+  }
+
   render() {
     return (
       <div className="container">
         <h1>Create New Collection</h1>
         <form onSubmit={e => this.handleSubmit(e)}>
-          <CollectionInputContainer>
-            <Label for="collectionName">New Collection Name:</Label>
-            <Input
-              required
-              type="text"
-              value={this.state.collectionName}
-              onChange={e => this.setState({ collectionName: e.target.value })}
-              name="collectionName"
-              id="collectionName"
-            />
-          </CollectionInputContainer>
-          <CollectionInputContainer>
-            <Label for="category">New Collection category:</Label>
-            <Input
-              type="text"
-              value={this.state.category}
-              onChange={e => this.setState({ category: e.target.value })}
-              name="category"
-              id="category"
-            />
-          </CollectionInputContainer>
+          {this.renderInputs()}
           <CurrentMenuItems
             from="Collection"
             itemsToCollection={this.state.itemsToCollection}

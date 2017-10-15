@@ -7,25 +7,30 @@ import EditItemForm from './EditItemForm';
 
 const ItemHeaders = styled.span`
   text-decoration: underline;
-  width: 8rem;
+  width: 9rem;
   display: inline-block;
   margin-right: 0.5rem;
   font-size: 1.25rem;
 `;
 
 const ItemValues = styled.span`
-  width: 8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 9rem;
   display: inline-block;
   margin-right: 0.5rem;
   font-size: 1.25rem;
+
+  &:hover {
+    white-space: normal;
+  }
 `;
 
 const Button = styled.button`
   margin-right: 10px;
   display: inline-block;
 `;
-
-// const ButtonContainer = styled.button`display: inline-block`;
 
 class CurrentMenuItems extends Component {
   state = {
@@ -44,6 +49,7 @@ class CurrentMenuItems extends Component {
     }
     this.fetchItemData();
   }
+
   //get items
   fetchItemData() {
     const that = this;
@@ -52,8 +58,6 @@ class CurrentMenuItems extends Component {
       that.setState({ currentItemData: data.data });
     });
   }
-
-  //edit item
 
   //delete item
   handleDelete(id) {
@@ -65,51 +69,35 @@ class CurrentMenuItems extends Component {
     this.setState({ search });
   }
 
-  renderButtons(_id) {
-    if (this.props.from === 'Collection') {
-      return (
-        <span>
-          {this.props.itemsToCollection.indexOf(_id) === -1 ? (
-            <Button
-              className="btn btn-warning"
-              onClick={e => {
-                this.props.addItemsToCollection(_id, e);
-              }}
-            >
-              Add
-            </Button>
-          ) : (
-            <Button
-              className="btn btn-danger"
-              onClick={e => {
-                this.props.removeItemsFromCollection(_id, e);
-              }}
-            >
-              Remove
-            </Button>
-          )}
-        </span>
-      );
-    }
-
-    return (
-      <span style={{ position: 'absolute', right: '-.5rem', bottom: '.25rem' }}>
-        <Button
-          className="btn btn-warning"
-          onClick={() => {
-            this.setState({ editId: _id });
-          }}
-        >
-          Edit
-        </Button>
-        <Button className="btn btn-danger" onClick={() => this.handleDelete(_id)}>
-          Delete
-        </Button>
-      </span>
-    );
+  finishedEdit() {
+    this.setState({ editId: '' });
+    this.fetchItemData();
   }
 
-  showItemDiv({ _id, name, category, cost, price }, i) {
+  renderHeader() {
+    const HEADER_VALUES = ['Name', 'Category', 'Cost', 'Sell Price', 'Item Cost'];
+
+    return HEADER_VALUES.map(value => (
+      <ItemHeaders style={{ paddingLeft: '.5rem' }} key={value}>
+        {value}
+      </ItemHeaders>
+    ));
+  }
+
+  renderRows() {
+    const { currentItemData } = this.state;
+
+    if (currentItemData.length === 0) return;
+
+    return currentItemData.map((item, i) => {
+      if (item._id === this.state.editId) {
+        return <EditItemForm key={item._id} item={item} finishedEdit={this.finishedEdit.bind(this)} />;
+      }
+      return this.renderItemValues(item, i);
+    });
+  }
+
+  renderItemValues({ _id, name, category, cost, price }, i) {
     let style;
     const ITEM_VALUES = [
       name,
@@ -127,53 +115,53 @@ class CurrentMenuItems extends Component {
 
     return (
       <div key={_id} style={style}>
-        {ITEM_VALUES.map(value => <ItemValues key={value}>{value}</ItemValues>)}
+        {ITEM_VALUES.map((value, i) => {
+          return <ItemValues key={i}>{value}</ItemValues>;
+        })}
         {this.renderButtons(_id)}
       </div>
     );
   }
 
-  finishedEdit() {
-    this.setState({ editId: '' });
-    this.fetchItemData();
-  }
+  renderButtons(_id) {
+    const { from, itemsToCollection, addItemsToCollection, removeItemsFromCollection } = this.props;
 
-  renderItems() {
-    const HEADER_VALUES = ['Name', 'Category', 'Cost', 'Sell Price', 'Item Cost'];
-    const that = this;
-    if (this.state.currentItemData.length === 0) {
-      return;
+    if (from === 'Collection') {
+      return (
+        <span style={{ position: 'absolute', right: '-.5rem', bottom: '.25rem' }}>
+          {itemsToCollection.indexOf(_id) === -1 ? (
+            <Button className="btn btn-warning" onClick={e => addItemsToCollection(_id, e)}>
+              Add
+            </Button>
+          ) : (
+            <Button className="btn btn-danger" onClick={e => removeItemsFromCollection(_id, e)}>
+              Remove
+            </Button>
+          )}
+        </span>
+      );
     }
 
     return (
-      <div>
-        {HEADER_VALUES.map(value => (
-          <ItemHeaders style={{ paddingLeft: '.5rem' }} key={value}>
-            {value}
-          </ItemHeaders>
-        ))}
-
-        {this.state.currentItemData.map((item, i) => {
-          if (item._id === this.state.editId) {
-            return <EditItemForm key={item._id} item={item} finishedEdit={this.finishedEdit.bind(this)} />;
-          }
-          return that.showItemDiv(item, i);
-        })}
-      </div>
+      <span style={{ position: 'absolute', right: '-.5rem', bottom: '.25rem' }}>
+        <Button className="btn btn-warning" onClick={() => this.setState({ editId: _id })}>
+          Edit
+        </Button>
+        <Button className="btn btn-danger" onClick={() => this.handleDelete(_id)}>
+          Delete
+        </Button>
+      </span>
     );
   }
 
   render() {
     return (
-      <div>
+      <div className="container">
         <h4>Current menu items:</h4>
         <input type="text" placeholder="Search" aria-label="Search" onChange={e => this.updateSearch(e.target.value)} />
-        {this.renderItems()}
-        <div>
-          <Link to="/newitems" className="btn btn-primary">
-            Add New Items
-          </Link>
-        </div>
+        <br />
+        {this.renderHeader()}
+        {this.renderRows()}
       </div>
     );
   }
