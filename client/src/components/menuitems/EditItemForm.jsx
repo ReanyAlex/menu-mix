@@ -2,21 +2,9 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import axios from 'axios';
-import styled from 'styled-components';
+// import styled from 'styled-components';
 
 import RenderForm from './RenderForm';
-
-const Button = styled.input`
-  ${'' /* display: block;
-  font-size: 1.5rem;
-  margin-left: 20px;
-  margin-top: 20px;
-
-  @media only screen and (min-width: 1200px) {
-    display: inline-block;
-    margin-top: 0;
-  } */};
-`;
 
 class EditItemForm extends Component {
   state = {
@@ -75,7 +63,7 @@ class EditItemForm extends Component {
     return (
       <form onSubmit={this.handleSubmit.bind(this)}>
         {this.renderForm()}
-        <Button type="submit" />
+        <button type="submit" />
       </form>
     );
   }

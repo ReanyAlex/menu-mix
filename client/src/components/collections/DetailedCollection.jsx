@@ -10,6 +10,13 @@ const TableData = styled.td`
   text-align: center;
 `;
 
+const TableFiller = styled.td`
+  background-color: lightgray;
+  border: solid 1px gray;
+`;
+
+const AmountInput = styled.input`width: 5rem;`;
+
 class DetailedCollection extends Component {
   state = {
     collectionsData: [],
@@ -175,8 +182,7 @@ class DetailedCollection extends Component {
 
   itemAmountInput(collectionName, name, nestedItem) {
     return (
-      <input
-        style={{ width: '5rem' }}
+      <AmountInput
         min="0"
         type="number"
         value={nestedItem}
@@ -204,7 +210,7 @@ class DetailedCollection extends Component {
 
     return (
       <tr>
-        <TableData style={{ background: 'lightgrey' }} />
+        <TableFiller />
         {TOTAL_EQUATIONS.map((equation, i) => {
           console.log(isNaN(equation[1]));
           return (
@@ -215,7 +221,7 @@ class DetailedCollection extends Component {
             </TableData>
           );
         })}
-        <TableData colSpan={3} style={{ background: 'lightgrey' }} />
+        <TableFiller colSpan={3} />
       </tr>
     );
   }
