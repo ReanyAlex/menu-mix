@@ -9,7 +9,13 @@ const collectionHistoricData = new Schema({
       costPercent: Number,
       totalCost: Number,
       totalRevenue: Number,
-      totalMargin: Number
+      totalMargin: Number,
+      itemsSoldPerItem: [
+        {
+          item: String,
+          amount: Number
+        }
+      ]
     }
   ],
   owner: String

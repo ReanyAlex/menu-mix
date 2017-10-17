@@ -12,28 +12,34 @@ module.exports = {
     CollectionHistoricData.findOne({ collectionName }, function(error, data) {
       if (error) return;
       if (data === null) {
+        // console.log('dataObject', dataObject.snapShot);
         const newHistoricData = new CollectionHistoricData(dataObject);
-        console.log('created new document');
-        // newHistoricData.save();
+        // console.log('created new document');
+        // console.log(newHistoricData.snapShot[0]);
+        newHistoricData.save();
       } else {
         //if counter is not zero it means that the date was found within the document
         let counter = 0;
 
-        // console.log('before', data.snapShot);
+        if (data.snapShot.length >= 1) {
+          // console.log('sort');
+          data.snapShot.sort(function(a, b) {
+            return a.date - b.date;
+          });
 
-        data.snapShot.sort(function(a, b) {
-          return a.date - b.date;
-        });
+          data.snapShot.forEach(snap => {
+            if (new Date(snapShot.date).toString() === snap.date.toString()) counter++;
+          });
+        }
 
-        console.log('after', data.snapShot);
-
-        data.snapShot.forEach(snap => {
-          if (new Date(snapShot[0].date).toString() === snap.date.toString()) counter++;
-        });
-
+        // console.log(snapShot);
         if (counter === 0) {
-          console.log(counter);
-          data.snapShot.push(snapShot[0]);
+          // console.log('before push', data.snapShot[0]);
+          // console.log('------------------------');
+          // console.log('to be pushed', snapShot);
+          data.snapShot.push(snapShot);
+          // console.log('------------------------');
+          // console.log('after push', data.snapShot[0]);
           data.save();
           console.log('added to document');
         } else {

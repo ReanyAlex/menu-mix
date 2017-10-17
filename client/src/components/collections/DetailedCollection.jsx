@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import styled from 'styled-components';
-import equations from '../../equtions';
+import equations from '../../helpers/detailedcollectionequtions';
 
 import Calender from './Calender';
 
@@ -43,6 +43,7 @@ class DetailedCollection extends Component {
     collectionsData: [],
     itemSoldObject: {},
     numItemsSoldArray: [],
+    itemsSoldPerItem: [],
     itemsSoldTotal: 0,
     costPercent: 0,
     totalCost: 0,
@@ -51,8 +52,35 @@ class DetailedCollection extends Component {
   };
 
   componentDidMount() {
-    console.log(document.querySelector('#id'));
     this.fetchCollection();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    this.itemsSoldPerItem();
+  }
+
+  itemsSoldPerItem() {
+    const itemsSoldPerItem = [];
+    const { collectionsData, itemSoldObject } = this.state;
+    const { items, collectionName } = collectionsData[0];
+
+    items.forEach(item => {
+      const nestedItem = itemSoldObject[collectionName][item.name];
+      itemsSoldPerItem.push({ item: item.name, amount: nestedItem });
+    });
+
+    const nextAmount = this.reduceObject(this.state.itemsSoldPerItem);
+    const currentAmount = this.reduceObject(itemsSoldPerItem);
+    //check to make sure a change has occured relating to this state item
+    if (nextAmount !== currentAmount) {
+      this.setState({ itemsSoldPerItem });
+    }
+  }
+
+  reduceObject(object) {
+    return Object.keys(object).reduce(function(previous, key) {
+      return previous + object[key].amount;
+    }, 0);
   }
 
   fetchCollection() {
@@ -94,38 +122,6 @@ class DetailedCollection extends Component {
     this.setState({ itemsSoldTotal, numItemsSoldArray });
   }
 
-  //Equations for the chart
-  // avgPriceOrCost(items, category) {
-  //   const avgCostArray = [];
-  //   const { numItemsSoldArray, itemsSoldTotal } = this.state;
-  //   items.map((item, i) => avgCostArray.push(item[category] * numItemsSoldArray[i]));
-  //   const avgCostReduced = avgCostArray.reduce((a, b) => a + b, 0);
-  //
-  //   const avgCost = avgCostReduced / itemsSoldTotal / 100;
-  //   return avgCost;
-  // }
-
-  categorizingHighLow(itemValue, compare) {
-    if (itemValue >= compare) {
-      return 'High';
-    } else if (itemValue < compare) {
-      return 'Low';
-    }
-  }
-
-  menuCategory(profit, popularity) {
-    if ((profit === 'High') & (popularity === 'High')) {
-      return 'Star';
-    } else if ((profit === 'High') & (popularity === 'Low')) {
-      return 'Puzzle';
-    } else if ((profit === 'Low') & (popularity === 'High')) {
-      return 'Work Horse';
-    } else if ((profit === 'Low') & (popularity === 'Low')) {
-      return 'Dog';
-    }
-  }
-  //Equations for the chart above
-
   renderCollections() {
     return this.state.collectionsData.map(collection => {
       const { _id, collectionName, category } = collection;
@@ -163,9 +159,6 @@ class DetailedCollection extends Component {
   }
 
   renderDateSelector() {
-    const m = moment(new Date(this.state.collectionDate));
-    const endOfWeekDate = m.add(7, 'days').format('ll');
-    console.log(endOfWeekDate);
     return (
       <form>
         <fieldset>
@@ -193,20 +186,7 @@ class DetailedCollection extends Component {
   }
 
   renderTableHeader() {
-    const TABLE_HEADER = [
-      'Item Name',
-      '# Sold',
-      'Cost',
-      'Price',
-      'Cost %',
-      'CM',
-      'Total Cost',
-      'Total Revenue',
-      'Total Margin',
-      `Profit - Rank`,
-      'Popularity - Rank',
-      'Menu - category'
-    ];
+    const TABLE_HEADER = equations.TABLE_HEADER();
 
     return (
       <thead>
@@ -217,32 +197,25 @@ class DetailedCollection extends Component {
 
   renderItemRow({ collectionName, items }) {
     const { itemSoldObject, itemsSoldTotal, numItemsSoldArray } = this.state;
-    // const { collectionName, items } = collection;
-    const avgCost = equations.avgPriceOrCost(items, 'cost', this.state);
-    const avgPrice = equations.avgPriceOrCost(items, 'price', this.state);
-    const avgContributionMargin = avgPrice - avgCost;
 
     return items.map((item, i) => {
       const { _id, name, cost, price } = item;
-      const contributionMargin = (price - cost) / 100;
+      const { state } = this;
       const nestedItem = itemSoldObject[collectionName][name];
-      const profitRank = this.categorizingHighLow(contributionMargin, avgContributionMargin);
-      const popularityRank = this.categorizingHighLow(numItemsSoldArray[i], itemsSoldTotal / numItemsSoldArray.length);
 
-      const ITEM_EQUATIONS = [
+      const ITEM_EQUATIONS = equations.ITEM_EQUATIONS(
         name,
-        this.itemAmountInput(collectionName, name, nestedItem),
-        `$${cost / 100}`,
-        `$${price / 100}`,
-        `${(cost / price * 100).toFixed(2)}%`,
-        `$${contributionMargin}`,
-        `$${(nestedItem * (cost / 100)).toFixed(2)}`,
-        `$${(nestedItem * (price / 100)).toFixed(2)}`,
-        `$${(nestedItem * ((price - cost) / 100)).toFixed(2)}`,
-        profitRank,
-        popularityRank,
-        this.menuCategory(profitRank, popularityRank)
-      ];
+        this.itemAmountInput.bind(this),
+        collectionName,
+        nestedItem,
+        cost,
+        price,
+        items,
+        state,
+        numItemsSoldArray,
+        i,
+        itemsSoldTotal
+      );
 
       return <tr key={_id}>{ITEM_EQUATIONS.map((equation, i) => <TableData key={i}>{equation}</TableData>)}</tr>;
     });
@@ -261,20 +234,8 @@ class DetailedCollection extends Component {
 
   renderTotalRow({ items }) {
     const { itemsSoldTotal } = this.state;
-    const avgCost = equations.avgPriceOrCost(items, 'cost', this.state);
-    const avgPrice = equations.avgPriceOrCost(items, 'price', this.state);
-    const avgContributionMargin = avgPrice - avgCost;
 
-    const TOTAL_EQUATIONS = [
-      ['', `${itemsSoldTotal}`, ''],
-      ['$', `${avgCost.toFixed(2)}`, ''],
-      ['$', `${avgPrice.toFixed(2)}`, ''],
-      ['', `${(avgCost / avgPrice * 100).toFixed(2)}`, '%'],
-      ['$', `${avgContributionMargin.toFixed(2)}`, ''],
-      ['$', `${(itemsSoldTotal * avgCost).toFixed(2)}`, ''],
-      ['$', `${(itemsSoldTotal * avgPrice).toFixed(2)}`, ''],
-      ['$', `${(itemsSoldTotal * (avgPrice - avgCost)).toFixed(2)}`, '']
-    ];
+    const TOTAL_EQUATIONS = equations.TOTAL_EQUATIONS(itemsSoldTotal, items, this.state);
 
     return (
       <tr>
@@ -295,26 +256,22 @@ class DetailedCollection extends Component {
 
   handleSnapShotSubmit({ items, collectionName }) {
     const url = '/api/collectionhistoricdata';
-    const { collectionDate } = this.state;
-    const m = moment(new Date(collectionDate));
-    const date = m.add(6, 'days')._d;
-    console.log(typeof date, date);
+    const m = moment(new Date(this.state.collectionDate));
+    const { itemsSoldTotal, itemsSoldPerItem } = this.state;
+    let snapShot = {};
 
-    const { itemsSoldTotal } = this.state;
-    const avgCost = equations.avgPriceOrCost(items, 'cost', this.state);
-    const avgPrice = equations.avgPriceOrCost(items, 'price', this.state);
-    const costPercent = (avgCost / avgPrice * 100).toFixed(2);
-    const totalCost = (itemsSoldTotal * avgCost).toFixed(2);
-    const totalRevenue = (itemsSoldTotal * avgPrice).toFixed(2);
-    const totalMargin = (itemsSoldTotal * (avgPrice - avgCost)).toFixed(2);
-
-    const snapShot = [{ date, costPercent, totalCost, totalRevenue, totalMargin }];
-    const header = { collectionName: collectionName, snapShot };
+    snapShot.date = m.add(6, 'days')._d;
+    snapShot.costPercent = equations.totalCostPercent(items, this.state);
+    snapShot.totalCost = equations.totalCost(itemsSoldTotal, items, this.state);
+    snapShot.totalRevenue = equations.totalRevenue(itemsSoldTotal, items, this.state);
+    snapShot.totalMargin = equations.totalMargin(itemsSoldTotal, items, this.state);
+    snapShot.itemsSoldPerItem = itemsSoldPerItem;
+    // console.log(itemsSoldPerItem);
+    const header = { collectionName, snapShot };
     axios.post(url, header);
   }
 
   render() {
-    console.log(equations.test());
     return <div className="container">{this.renderCollections()}</div>;
   }
 }
