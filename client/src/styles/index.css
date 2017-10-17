@@ -1,0 +1,4 @@
+/*override the disabled days css from react-day-picker for the week selected*/
+.DayPicker-Day--selected {
+  background-color: #4a90e2;
+}

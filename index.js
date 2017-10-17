@@ -8,6 +8,7 @@ const keys = require('./config/keys');
 require('./models/User');
 require('./models/MenuItem');
 require('./models/Collection');
+require('./models/collectionHistoricData');
 
 require('./services/passport');
 
@@ -30,6 +31,7 @@ require('./routes/authRoutes')(app);
 require('./routes/settingsRoutes')(app);
 require('./routes/itemRoutes')(app);
 require('./routes/collectionRoutes')(app);
+require('./routes/collectionHistoricDataRoutes')(app);
 
 if (process.env.NODE_ENV === 'production') {
   // Express will serve up production assets
