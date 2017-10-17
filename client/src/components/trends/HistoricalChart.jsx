@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import styled from 'styled-components';
+
+const StyledXAxis = styled(XAxis)``;
 
 class HistoricalChart extends Component {
   state = {
@@ -12,6 +15,15 @@ class HistoricalChart extends Component {
 
   componentDidMount() {
     this.fetchHistoricalData();
+  }
+
+  getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
   }
 
   fetchHistoricalData() {
@@ -34,7 +46,7 @@ class HistoricalChart extends Component {
 
   renderFilter() {
     return (
-      <form onClick={this.handleRadioClick.bind(this)}>
+      <form onClick={this.handleRadioClick.bind(this)} style={{ padding: '1rem 0 .5rem 3rem' }}>
         <fieldset>
           <legend>Click to chart specific data: </legend>
           <input defaultChecked type="radio" name="filter" value="costPercent" id="costPercent" />
@@ -44,6 +56,10 @@ class HistoricalChart extends Component {
           <input type="radio" name="filter" value="values" id="values" />
           <label style={{ margin: '0 1rem' }} htmlFor="values">
             Revenue Values
+          </label>
+          <input type="radio" name="filter" value="items" id="items" />
+          <label style={{ margin: '0 1rem' }} htmlFor="items">
+            Number Items Sold
           </label>
         </fieldset>
       </form>
@@ -62,36 +78,61 @@ class HistoricalChart extends Component {
     if (filter === 'costPercent') {
       return <Line type="monotone" name="Cost %" dataKey="costPercent" stroke="orange" />;
     } else if (filter === 'values') {
-      return [
-        <Line key="1" type="monotone" name="Total Cost $" dataKey="totalCost" stroke="red" />,
-        <Line key="2" type="monotone" name=" Total Margin $" dataKey="totalMargin" stroke="blue" />,
-        <Line key="3" type="monotone" name="Total Revenue $" dataKey="totalRevenue" stroke="green" />
-      ];
+      return this.renderValueLines();
+    } else if (filter === 'items') {
+      return this.renderItemLines();
     }
   }
+
+  renderValueLines() {
+    return [
+      <Line key="1" type="monotone" name="Total Cost $" dataKey="totalCost" stroke="red" />,
+      <Line key="2" type="monotone" name="Total Margin $" dataKey="totalMargin" stroke="blue" />,
+      <Line key="3" type="monotone" name="Total Revenue $" dataKey="totalRevenue" stroke="green" />
+    ];
+  }
+
+  renderItemLines() {
+    const { data } = this.state;
+    // console.log(data[data.length - 1].itemsSoldPerItem);
+    return data[data.length - 1].itemsSoldPerItem.map((lineItem, i) => {
+      const { _id, item, amount } = lineItem;
+      return (
+        <Line
+          key={_id}
+          type="monotone"
+          name={item}
+          dataKey={`itemsSoldPerItem[${i}].amount`}
+          stroke={this.getRandomColor()}
+        />
+      );
+    });
+  }
+
   renderChart() {
     let unit = ' $ ';
 
-    if (this.state.filter === 'costPercent') {
-      unit = '%';
-    }
+    if (this.state.filter === 'costPercent') unit = '%';
+    if (this.state.filter === 'items') unit = '';
+
     return (
       <LineChart width={1000} height={600} data={this.state.data}>
-        <XAxis dataKey="date" />
+        <XAxis dataKey="date" dy={10} />
         <YAxis unit={unit} />
         <CartesianGrid />
         <Tooltip />
-        <Legend />
+        <Legend dy={30} />
+
         {this.renderChartLine()}
       </LineChart>
     );
   }
 
   render() {
-    console.log(this.state.data);
+    // console.log(this.state.data);
     return (
-      <div className="container">
-        <h3>{`Historic Data Chart for ${this.state.name}`}</h3>
+      <div style={{ padding: '0rem 0 5rem 2rem' }}>
+        <h3 style={{ paddingLeft: '3rem' }}>{`Historic Data Chart for ${this.state.name}`}</h3>
         {this.renderFilter()}
         {this.renderChart()}
       </div>
