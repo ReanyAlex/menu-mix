@@ -44,6 +44,7 @@ class Header extends Component {
     const HEADER_LINKS = [
       { type: '', path: '/items', displayed: 'Items' },
       { type: '', path: '/collections', displayed: 'Collections' },
+      { type: '', path: '/trends', displayed: 'Trends' },
       { type: '', path: '/settings', displayed: 'Settings' },
       { type: 'last', path: '/api/logout', displayed: 'Logout' }
     ];

@@ -6,12 +6,16 @@ import * as actions from '../actions';
 import Header from './Header';
 import Dashboard from './Dashboard';
 import Settings from './Settings';
+
 import MenuItems from './menuitems/MenuItems';
 import NewMenuItems from './menuitems/NewMenuItems';
 
 import CurrentCollections from './collections/CurrentCollections';
 import NewCollection from './collections/NewCollection';
 import DetailedCollection from './collections/DetailedCollection';
+
+import CurrentTrends from './trends/CurrentTrends';
+import HistoricalChart from './trends/HistoricalChart';
 
 class App extends Component {
   componentDidMount() {
@@ -31,6 +35,8 @@ class App extends Component {
           <Route exact path="/newcollection" component={NewCollection} />
           <Route exact path="/newcollection/:collection/:id" component={DetailedCollection} />
           <Route exact path="/newcollection/:collection/:id/:edit" component={NewCollection} />
+          <Route exact path="/trends" component={CurrentTrends} />
+          <Route exact path="/trends/historicalchart/:collection/:id" component={HistoricalChart} />
         </div>
       </BrowserRouter>
     );

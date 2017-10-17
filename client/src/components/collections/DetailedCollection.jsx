@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 // import { Link } from 'react-router-dom';
 import axios from 'axios';
+import moment from 'moment';
 import styled from 'styled-components';
+import equations from '../../equtions';
+
+import Calender from './Calender';
 
 const TableData = styled.td`
   white-space: nowrap;
@@ -18,15 +22,40 @@ const TableFiller = styled.td`
 
 const AmountInput = styled.input`width: 5rem;`;
 
+const HeaderDiv = styled.div`
+  position: relative;
+  width: 50%;
+  display: inline-block;
+`;
+
+const HeaderH3 = styled.h3``;
+
+const HeaderH5 = styled.h5`
+  position: absolute;
+  top: 6rem;
+`;
+
+const Button = styled.button`margin-top: 2rem;`;
+
 class DetailedCollection extends Component {
   state = {
+    collectionDate: moment().day(0)._d,
     collectionsData: [],
     itemSoldObject: {},
     numItemsSoldArray: [],
-    itemsSoldTotal: 0
+    itemsSoldTotal: 0,
+    costPercent: 0,
+    totalCost: 0,
+    totalRevenue: 0,
+    totalMargin: 0
   };
 
   componentDidMount() {
+    console.log(document.querySelector('#id'));
+    this.fetchCollection();
+  }
+
+  fetchCollection() {
     const { collection, id } = this.props.match.params;
     const url = `/api/collection/?collection=${collection}/&id=${id}`;
 
@@ -66,15 +95,15 @@ class DetailedCollection extends Component {
   }
 
   //Equations for the chart
-  avgPriceOrCost(items, category) {
-    const avgCostArray = [];
-    const { numItemsSoldArray, itemsSoldTotal } = this.state;
-    items.map((item, i) => avgCostArray.push(item[category] * numItemsSoldArray[i]));
-    const avgCostReduced = avgCostArray.reduce((a, b) => a + b, 0);
-
-    const avgCost = avgCostReduced / itemsSoldTotal / 100;
-    return avgCost;
-  }
+  // avgPriceOrCost(items, category) {
+  //   const avgCostArray = [];
+  //   const { numItemsSoldArray, itemsSoldTotal } = this.state;
+  //   items.map((item, i) => avgCostArray.push(item[category] * numItemsSoldArray[i]));
+  //   const avgCostReduced = avgCostArray.reduce((a, b) => a + b, 0);
+  //
+  //   const avgCost = avgCostReduced / itemsSoldTotal / 100;
+  //   return avgCost;
+  // }
 
   categorizingHighLow(itemValue, compare) {
     if (itemValue >= compare) {
@@ -103,12 +132,50 @@ class DetailedCollection extends Component {
 
       return (
         <div key={_id}>
-          <h3>Collection Title: {collectionName}</h3>
-          <h5>Category: {category}</h5>
+          <HeaderDiv>
+            <HeaderH3>Collection Title: {collectionName}</HeaderH3>
+            <HeaderH5>Category: {category}</HeaderH5>
+          </HeaderDiv>
+
+          <HeaderDiv>{this.renderDateSelector()}</HeaderDiv>
           {this.renderTable(collection)}
+          <Button onClick={() => this.handleSnapShotSubmit(collection)} className="btn btn-primary">
+            Take SnapShot
+          </Button>
         </div>
       );
     });
+  }
+
+  handleDateSelect(day, { selected, disabled }) {
+    if (disabled) {
+      return;
+    }
+    if (selected) {
+      // Unselect the day if already selected
+      this.setState({
+        collectionDate: undefined
+      });
+      return;
+    }
+
+    this.setState({ collectionDate: day });
+  }
+
+  renderDateSelector() {
+    const m = moment(new Date(this.state.collectionDate));
+    const endOfWeekDate = m.add(7, 'days').format('ll');
+    console.log(endOfWeekDate);
+    return (
+      <form>
+        <fieldset>
+          <label>
+            <h5 style={{ paddingRight: '.5rem' }}>Date Selection:</h5>
+          </label>
+          <Calender value={this.state.collectionDate} onDayClick={this.handleDateSelect.bind(this)} />
+        </fieldset>
+      </form>
+    );
   }
 
   renderTable(collection) {
@@ -151,8 +218,8 @@ class DetailedCollection extends Component {
   renderItemRow({ collectionName, items }) {
     const { itemSoldObject, itemsSoldTotal, numItemsSoldArray } = this.state;
     // const { collectionName, items } = collection;
-    const avgCost = this.avgPriceOrCost(items, 'cost');
-    const avgPrice = this.avgPriceOrCost(items, 'price');
+    const avgCost = equations.avgPriceOrCost(items, 'cost', this.state);
+    const avgPrice = equations.avgPriceOrCost(items, 'price', this.state);
     const avgContributionMargin = avgPrice - avgCost;
 
     return items.map((item, i) => {
@@ -194,8 +261,8 @@ class DetailedCollection extends Component {
 
   renderTotalRow({ items }) {
     const { itemsSoldTotal } = this.state;
-    const avgCost = this.avgPriceOrCost(items, 'cost');
-    const avgPrice = this.avgPriceOrCost(items, 'price');
+    const avgCost = equations.avgPriceOrCost(items, 'cost', this.state);
+    const avgPrice = equations.avgPriceOrCost(items, 'price', this.state);
     const avgContributionMargin = avgPrice - avgCost;
 
     const TOTAL_EQUATIONS = [
@@ -213,7 +280,6 @@ class DetailedCollection extends Component {
       <tr>
         <TableFiller />
         {TOTAL_EQUATIONS.map((equation, i) => {
-          console.log(isNaN(equation[1]));
           return (
             <TableData key={i}>
               {equation[0]}
@@ -227,7 +293,28 @@ class DetailedCollection extends Component {
     );
   }
 
+  handleSnapShotSubmit({ items, collectionName }) {
+    const url = '/api/collectionhistoricdata';
+    const { collectionDate } = this.state;
+    const m = moment(new Date(collectionDate));
+    const date = m.add(6, 'days')._d;
+    console.log(typeof date, date);
+
+    const { itemsSoldTotal } = this.state;
+    const avgCost = equations.avgPriceOrCost(items, 'cost', this.state);
+    const avgPrice = equations.avgPriceOrCost(items, 'price', this.state);
+    const costPercent = (avgCost / avgPrice * 100).toFixed(2);
+    const totalCost = (itemsSoldTotal * avgCost).toFixed(2);
+    const totalRevenue = (itemsSoldTotal * avgPrice).toFixed(2);
+    const totalMargin = (itemsSoldTotal * (avgPrice - avgCost)).toFixed(2);
+
+    const snapShot = [{ date, costPercent, totalCost, totalRevenue, totalMargin }];
+    const header = { collectionName: collectionName, snapShot };
+    axios.post(url, header);
+  }
+
   render() {
+    console.log(equations.test());
     return <div className="container">{this.renderCollections()}</div>;
   }
 }
