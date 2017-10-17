@@ -8,7 +8,7 @@ const keys = require('./config/keys');
 require('./models/User');
 require('./models/MenuItem');
 require('./models/Collection');
-require('./models/collectionHistoricData');
+require('./models/CollectionHistoricData');
 
 require('./services/passport');
 
