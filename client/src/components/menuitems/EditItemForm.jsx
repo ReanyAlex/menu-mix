@@ -63,7 +63,9 @@ class EditItemForm extends Component {
     return (
       <form onSubmit={this.handleSubmit.bind(this)}>
         {this.renderForm()}
-        <button type="submit" />
+        <button type="submit" className="btn btn-primary">
+          Submit
+        </button>
       </form>
     );
   }

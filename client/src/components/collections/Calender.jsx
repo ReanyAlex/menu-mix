@@ -18,5 +18,5 @@ export default function Calender(props) {
     disabled: { daysOfWeek: [1, 2, 3, 4, 5, 6] }
   };
 
-  return <DayPicker selectedDays={range} onDayClick={props.onDayClick} modifiers={modifiers} />;
+  return <DayPicker month={range.from} selectedDays={range} onDayClick={props.onDayClick} modifiers={modifiers} />;
 }

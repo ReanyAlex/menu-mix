@@ -3,10 +3,8 @@ const equations = {
     return (price - cost) / 100;
   },
 
-  avgPriceOrCost: function(items, category, state) {
+  avgPriceOrCost: function(items, category, numItemsSoldArray, itemsSoldTotal) {
     const avgCostArray = [];
-    const { numItemsSoldArray, itemsSoldTotal } = state;
-
     items.map((item, i) => avgCostArray.push(item[category] * numItemsSoldArray[i]));
     const avgCostReduced = avgCostArray.reduce((a, b) => a + b, 0);
 
@@ -34,10 +32,10 @@ const equations = {
     }
   },
 
-  profitRank(price, cost, items, state) {
+  profitRank(price, cost, items, numItemsSoldArray, itemsSoldTotal) {
     return equations.categorizingHighLow(
       equations.contributionMargin(price, cost),
-      equations.avgContributionMargin(items, state)
+      equations.avgContributionMargin(items, numItemsSoldArray, itemsSoldTotal)
     );
   },
 
@@ -45,26 +43,34 @@ const equations = {
     return equations.categorizingHighLow(numItemsSoldArray[index], itemsSoldTotal / numItemsSoldArray.length);
   },
 
-  avgContributionMargin(items, state) {
-    return equations.avgPriceOrCost(items, 'price', state) - equations.avgPriceOrCost(items, 'cost', state);
+  avgContributionMargin(items, numItemsSoldArray, itemsSoldTotal) {
+    return (
+      equations.avgPriceOrCost(items, 'price', numItemsSoldArray, itemsSoldTotal) -
+      equations.avgPriceOrCost(items, 'cost', numItemsSoldArray, itemsSoldTotal)
+    );
   },
 
-  totalCostPercent(items, state) {
-    return equations.avgPriceOrCost(items, 'cost', state) / equations.avgPriceOrCost(items, 'price', state) * 100;
+  totalCostPercent(items, numItemsSoldArray, itemsSoldTotal) {
+    return (
+      equations.avgPriceOrCost(items, 'cost', numItemsSoldArray, itemsSoldTotal) /
+      equations.avgPriceOrCost(items, 'price', numItemsSoldArray, itemsSoldTotal) *
+      100
+    );
   },
 
-  totalCost(itemsSoldTotal, items, state) {
-    return (itemsSoldTotal * equations.avgPriceOrCost(items, 'cost', state)).toFixed(2);
+  totalCost(itemsSoldTotal, items, numItemsSoldArray) {
+    return itemsSoldTotal * equations.avgPriceOrCost(items, 'cost', numItemsSoldArray, itemsSoldTotal);
   },
 
-  totalRevenue(itemsSoldTotal, items, state) {
-    return (itemsSoldTotal * equations.avgPriceOrCost(items, 'price', state)).toFixed(2);
+  totalRevenue(itemsSoldTotal, items, numItemsSoldArray) {
+    return itemsSoldTotal * equations.avgPriceOrCost(items, 'price', numItemsSoldArray, itemsSoldTotal);
   },
 
-  totalMargin(itemsSoldTotal, items, state) {
+  totalMargin(itemsSoldTotal, items, numItemsSoldArray) {
     return (
       itemsSoldTotal *
-      (equations.avgPriceOrCost(items, 'price', state) - equations.avgPriceOrCost(items, 'cost', state))
+      (equations.avgPriceOrCost(items, 'price', numItemsSoldArray, itemsSoldTotal) -
+        equations.avgPriceOrCost(items, 'cost', numItemsSoldArray, itemsSoldTotal))
     );
   },
 
@@ -88,19 +94,19 @@ const equations = {
   ITEM_EQUATIONS(
     name,
     itemAmountInput,
+    handleNumberOfItemsSold,
     collectionName,
     nestedItem,
     cost,
     price,
     items,
-    state,
     numItemsSoldArray,
     index,
     itemsSoldTotal
   ) {
     return [
       name,
-      itemAmountInput(collectionName, name, nestedItem),
+      itemAmountInput(collectionName, name, nestedItem, handleNumberOfItemsSold),
       `$${cost / 100}`,
       `$${price / 100}`,
       `${(cost / price * 100).toFixed(2)}%`,
@@ -108,25 +114,25 @@ const equations = {
       `$${(nestedItem * (cost / 100)).toFixed(2)}`,
       `$${(nestedItem * (price / 100)).toFixed(2)}`,
       `$${(nestedItem * ((price - cost) / 100)).toFixed(2)}`,
-      equations.profitRank(price, cost, items, state),
+      equations.profitRank(price, cost, items, numItemsSoldArray, itemsSoldTotal),
       equations.popularityRank(numItemsSoldArray, index, itemsSoldTotal),
       equations.menuCategory(
-        equations.profitRank(price, cost, items, state),
+        equations.profitRank(price, cost, items, numItemsSoldArray, itemsSoldTotal),
         equations.popularityRank(numItemsSoldArray, index, itemsSoldTotal)
       )
     ];
   },
 
-  TOTAL_EQUATIONS(itemsSoldTotal, items, state) {
+  TOTAL_EQUATIONS(itemsSoldTotal, items, numItemsSoldArray) {
     return [
       ['', `${itemsSoldTotal}`, ''],
-      ['$', `${equations.avgPriceOrCost(items, 'cost', state).toFixed(2)}`, ''],
-      ['$', `${equations.avgPriceOrCost(items, 'price', state).toFixed(2)}`, ''],
-      ['', `${equations.totalCostPercent(items, state).toFixed(2)}`, '%'],
-      ['$', `${equations.avgContributionMargin(items, state).toFixed(2)}`, ''],
-      ['$', `${equations.totalCost(itemsSoldTotal, items, state)}`, ''],
-      ['$', `${equations.totalRevenue(itemsSoldTotal, items, state)}`, ''],
-      ['$', `${equations.totalMargin(itemsSoldTotal, items, state).toFixed(2)}`, '']
+      ['$', `${equations.avgPriceOrCost(items, 'cost', numItemsSoldArray, itemsSoldTotal).toFixed(2)}`, ''],
+      ['$', `${equations.avgPriceOrCost(items, 'price', numItemsSoldArray, itemsSoldTotal).toFixed(2)}`, ''],
+      ['', `${equations.totalCostPercent(items, numItemsSoldArray, itemsSoldTotal).toFixed(2)}`, '%'],
+      ['$', `${equations.avgContributionMargin(items, numItemsSoldArray, itemsSoldTotal).toFixed(2)}`, ''],
+      ['$', `${equations.totalCost(itemsSoldTotal, items, numItemsSoldArray, itemsSoldTotal).toFixed(2)}`, ''],
+      ['$', `${equations.totalRevenue(itemsSoldTotal, items, numItemsSoldArray, itemsSoldTotal).toFixed(2)}`, ''],
+      ['$', `${equations.totalMargin(itemsSoldTotal, items, numItemsSoldArray, itemsSoldTotal).toFixed(2)}`, '']
     ];
   }
 };

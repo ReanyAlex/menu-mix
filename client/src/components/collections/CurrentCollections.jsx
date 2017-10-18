@@ -19,8 +19,8 @@ const NewCollectionLink = styled(Link)`margin-top: 2rem;`;
 
 class CurrentCollections extends Component {
   state = {
-    collectionsData: [],
-    itemSoldObject: {}
+    collectionsData: []
+    // itemSoldObject: {}
   };
 
   componentDidMount() {
@@ -36,15 +36,15 @@ class CurrentCollections extends Component {
       }
 
       const collectionsData = res.data;
-      const { collectionName } = res.data[0];
-      const itemSoldObject = {};
-      itemSoldObject[collectionName] = {};
+      // const { collectionName } = res.data[0];
+      // const itemSoldObject = {};
+      // itemSoldObject[collectionName] = {};
 
-      res.data[0].items.map(item => {
-        return (itemSoldObject[collectionName][item.name] = 0);
-      });
+      // res.data[0].items.map(item => {
+      //   return (itemSoldObject[collectionName][item.name] = 0);
+      // });
 
-      this.setState({ collectionsData, itemSoldObject });
+      this.setState({ collectionsData });
     });
   }
 
@@ -78,6 +78,7 @@ class CurrentCollections extends Component {
   }
 
   render() {
+    console.log(this.state);
     return (
       <div>
         <div className="container">

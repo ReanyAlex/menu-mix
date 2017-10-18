@@ -12,10 +12,11 @@ import NewMenuItems from './menuitems/NewMenuItems';
 
 import CurrentCollections from './collections/CurrentCollections';
 import NewCollection from './collections/NewCollection';
-import DetailedCollection from './collections/DetailedCollection';
+import DetailedCollection from './detailedCollection/DetailedCollection';
 
 import CurrentTrends from './trends/CurrentTrends';
 import HistoricalChart from './trends/HistoricalChart';
+import ListSpecificTrendPastData from './trends/ListSpecificTrendPastData';
 
 class App extends Component {
   componentDidMount() {
@@ -37,6 +38,13 @@ class App extends Component {
           <Route exact path="/newcollection/:collection/:id/:edit" component={NewCollection} />
           <Route exact path="/trends" component={CurrentTrends} />
           <Route exact path="/trends/historicalchart/:collection/:id" component={HistoricalChart} />
+          <Route exact path="/trends/listhistorictrend/:collection/:id" component={ListSpecificTrendPastData} />
+          <Route exact path="/trends/individualhistorictrend/:collection/:id/:date" component={DetailedCollection} />
+          <Route
+            exact
+            path="/trends/individualhistorictrend/:edit/:collection/:id/:date"
+            component={DetailedCollection}
+          />
         </div>
       </BrowserRouter>
     );

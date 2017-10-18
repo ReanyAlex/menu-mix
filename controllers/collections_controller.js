@@ -4,7 +4,6 @@ const Collections = mongoose.model('collections');
 module.exports = {
   create(req, res, next) {
     const owner = req.session.passport.user;
-    // console.log(req.body);
     const { collectionName, category, items } = req.body;
     const newCollection = new Collections({ collectionName, category, items, owner });
     newCollection.save();
@@ -15,12 +14,14 @@ module.exports = {
     let searchQuery;
     const owner = req.session.passport.user;
     const { search, id } = req.query;
-
     if (id === undefined) {
       searchQuery = { collectionName: new RegExp(search, 'i'), owner };
+
+      // searchQuery = { collectionName: new RegExp(search, 'i'), owner };
     } else {
       searchQuery = { _id: id, owner };
     }
+
     Collections.find(searchQuery)
       .populate('items')
       .then(collections => {

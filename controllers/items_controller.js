@@ -14,7 +14,6 @@ module.exports = {
       const price = itemPrice * 100;
 
       const newMenuItem = new MenuItem({ name, category, cost, price, owner });
-      console.log(newMenuItem);
       newMenuItem.save();
     });
     res.send({ message: 'Items created' });
@@ -34,7 +33,6 @@ module.exports = {
     MenuItem.findByIdAndUpdate(id, { $set: itemProps })
       .then(() => MenuItem.findById(id))
       .then(item => {
-        console.log(item);
         res.send(item);
       })
       .catch(next);

@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from 'recharts';
-import styled from 'styled-components';
-
-const StyledXAxis = styled(XAxis)``;
+// import styled from 'styled-components';
 
 class HistoricalChart extends Component {
   state = {
@@ -76,7 +74,7 @@ class HistoricalChart extends Component {
   renderChartLine() {
     const { filter } = this.state;
     if (filter === 'costPercent') {
-      return <Line type="monotone" name="Cost %" dataKey="costPercent" stroke="orange" />;
+      return <Line type="monotone" name="Cost %" dataKey="costPercent" stroke="orange" strokeWidth="4" />;
     } else if (filter === 'values') {
       return this.renderValueLines();
     } else if (filter === 'items') {
@@ -85,18 +83,28 @@ class HistoricalChart extends Component {
   }
 
   renderValueLines() {
-    return [
-      <Line key="1" type="monotone" name="Total Cost $" dataKey="totalCost" stroke="red" />,
-      <Line key="2" type="monotone" name="Total Margin $" dataKey="totalMargin" stroke="blue" />,
-      <Line key="3" type="monotone" name="Total Revenue $" dataKey="totalRevenue" stroke="green" />
+    const VALUELINES = [
+      { name: 'Total Cost $', dataKey: 'totalCost', color: 'red' },
+      { name: 'Total Margin $', dataKey: 'totalMargin', color: 'blue' },
+      { name: 'Total Revenue $', dataKey: 'totalRevenue', color: 'green' }
     ];
+
+    return VALUELINES.map(line => (
+      <Line
+        key={line.name}
+        type="monotone"
+        name={line.name}
+        dataKey={line.dataKey}
+        stroke={line.color}
+        strokeWidth="4"
+      />
+    ));
   }
 
   renderItemLines() {
     const { data } = this.state;
-    // console.log(data[data.length - 1].itemsSoldPerItem);
     return data[data.length - 1].itemsSoldPerItem.map((lineItem, i) => {
-      const { _id, item, amount } = lineItem;
+      const { _id, item } = lineItem;
       return (
         <Line
           key={_id}
@@ -104,6 +112,7 @@ class HistoricalChart extends Component {
           name={item}
           dataKey={`itemsSoldPerItem[${i}].amount`}
           stroke={this.getRandomColor()}
+          strokeWidth="4"
         />
       );
     });
@@ -129,7 +138,6 @@ class HistoricalChart extends Component {
   }
 
   render() {
-    // console.log(this.state.data);
     return (
       <div style={{ padding: '0rem 0 5rem 2rem' }}>
         <h3 style={{ paddingLeft: '3rem' }}>{`Historic Data Chart for ${this.state.name}`}</h3>
