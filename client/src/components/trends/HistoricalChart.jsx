@@ -8,6 +8,7 @@ class HistoricalChart extends Component {
   state = {
     name: '',
     data: [],
+    object: {},
     filter: 'costPercent'
   };
 
@@ -32,13 +33,31 @@ class HistoricalChart extends Component {
       const name = res.data[0].collectionName;
       const data = res.data[0].snapShot;
 
+      const array = [];
       data.forEach((snap, i) => {
+        //set date format
         const m = moment(new Date(snap.date));
         const date = m.format('L');
-
         data[i].date = date;
+
+        //create an array of items to creat individual lines for
+        snap.itemsSoldPerItem.forEach(item => {
+          if (array.indexOf(item.item) === -1) {
+            array.push(item.item);
+          }
+        });
       });
-      this.setState({ data, name });
+
+      //reformat itemsSoldPerItem for chart needs to be placed last
+      data.forEach((object, i) => {
+        let newObject = [];
+        object.itemsSoldPerItem.forEach(item => {
+          newObject[item.item] = item.amount;
+        });
+        data[i].itemsSoldPerItem = newObject;
+      });
+
+      this.setState({ data, name, array });
     });
   }
 
@@ -102,19 +121,20 @@ class HistoricalChart extends Component {
   }
 
   renderItemLines() {
-    const { data } = this.state;
+    const { data, array } = this.state;
+
     /*shows the data for the last date instance of the collection.
     Error if there is an edit to the item name. This will not be showcased
     Also Major errors when switching out items in the collection  */
-    return data[data.length - 1].itemsSoldPerItem.map((lineItem, i) => {
-      const { _id, item } = lineItem;
-      console.log(item);
+    return array.map((lineItem, i) => {
+      console.log(lineItem);
+      console.log(data[0].itemsSoldPerItem[lineItem]);
       return (
         <Line
-          key={_id}
+          key={i}
           type="monotone"
-          name={item}
-          dataKey={`itemsSoldPerItem[${i}].amount`}
+          name={lineItem}
+          dataKey={`itemsSoldPerItem[${lineItem}]`}
           stroke={this.getRandomColor()}
           strokeWidth="4"
         />
@@ -177,3 +197,36 @@ class HistoricalChart extends Component {
 }
 
 export default HistoricalChart;
+
+//under construction!!!!
+// renderItemLines() {
+//   const { data } = this.state;
+//   // console.log(data);
+//   /*shows the data for the last date instance of the collection.
+//   Error if there is an edit to the item name. This will not be showcased
+//   Also Major errors when switching out items in the collection  */
+//   let counter = 0;
+//   return data.map((object, i) => {
+//     // console.log(object);
+//
+//     return object.itemsSoldPerItem.map((itemObject, j) => {
+//       counter++;
+//       console.log('counter', counter);
+//       // console.log(object.date);
+//       // console.log(data[i].itemsSoldPerItem[j].item);
+//       // console.log({ name: itemObject.item, amount: itemObject.amount });
+//       const { item, _id, amount } = itemObject;
+//
+//       return (
+//         <Line
+//           key={_id}
+//           type="monotone"
+//           name={item}
+//           dataKey={`itemsSoldPerItem[${j}].amount`}
+//           stroke={this.getRandomColor()}
+//           strokeWidth="4"
+//         />
+//       );
+//     });
+//   });
+// }
