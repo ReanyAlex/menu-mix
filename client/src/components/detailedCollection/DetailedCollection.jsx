@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import { Link } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
 import styled from 'styled-components';
@@ -9,16 +8,10 @@ import Calender from '../collections/Calender';
 import DetailedCollectionTable from './DetailedCollectionTable';
 
 const HeaderDiv = styled.div`
-  position: relative;
-  width: 50%;
+  width: 45%;
+  padding-left: 5%;
+  float: left;
   display: inline-block;
-`;
-
-const HeaderH3 = styled.h3``;
-
-const HeaderH5 = styled.h5`
-  position: absolute;
-  top: 6rem;
 `;
 
 const Button = styled.button`margin-top: 2rem;`;
@@ -27,14 +20,7 @@ class DetailedCollection extends Component {
   state = {
     collectionDate: moment().day(0)._d,
     collectionsData: [],
-    itemSoldObject: {},
-    numItemsSoldArray: [],
     itemsSoldPerItem: [],
-    itemsSoldTotal: 0,
-    costPercent: 0,
-    totalCost: 0,
-    totalRevenue: 0,
-    totalMargin: 0,
     trendResMessage: ''
   };
 
@@ -42,27 +28,9 @@ class DetailedCollection extends Component {
     this.fetchCollection();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    this.itemsSoldPerItem();
-  }
-
-  itemsSoldPerItem() {
-    const itemsSoldPerItem = [];
-    const { collectionsData, itemSoldObject } = this.state;
-    const { items, collectionName } = collectionsData[0];
-
-    items.forEach(item => {
-      const nestedItem = itemSoldObject[collectionName][item.name];
-      itemsSoldPerItem.push({ item: item.name, amount: nestedItem });
-    });
-
-    const nextAmount = this.reduceObject(this.state.itemsSoldPerItem);
-    const currentAmount = this.reduceObject(itemsSoldPerItem);
-    //check to make sure a change has occured relating to this state item
-    if (nextAmount !== currentAmount) {
-      this.setState({ itemsSoldPerItem });
-    }
-  }
+  // componentDidUpdate(prevProps, prevState) {
+  //   // this.itemsSoldPerItem();
+  // }
 
   reduceObject(object) {
     return Object.keys(object).reduce(function(previous, key) {
@@ -79,86 +47,84 @@ class DetailedCollection extends Component {
       }
 
       const collectionsData = res.data;
-      const { collectionName } = res.data[0];
-      const itemSoldObject = {};
-      itemSoldObject[collectionName] = {};
 
-      res.data[0].items.map(item => {
-        return (itemSoldObject[collectionName][item.name] = 0);
+      const itemsSoldPerItem = [];
+
+      res.data[0].items.forEach(item => {
+        console.log(item.name);
+        itemsSoldPerItem.push({ item: item.name, amount: 0 });
       });
-      this.setState({ collectionsData, itemSoldObject });
 
       if (date !== undefined) {
-        this.fetchHistory();
+        this.fetchHistory(collectionsData);
+      } else {
+        this.setState({ collectionsData, itemsSoldPerItem });
       }
     });
   }
 
-  fetchHistory() {
+  fetchHistory(collectionsData) {
     const { collection, date } = this.props.match.params;
     const url = `/api/collectionhistoricdata?search=${collection}`;
 
     axios.get(url).then(res => {
-      if (res.data === []) {
-        return;
-      }
-      res.data[0].snapShot.forEach(snapShot => {
-        if (snapShot.date === date) {
-          const itemSoldObject = {};
-          itemSoldObject[collection] = {};
-
-          snapShot.itemsSoldPerItem.map(item => {
-            return (itemSoldObject[collection][item.item] = item.amount);
-          });
-
-          this.setState({
-            itemsSoldPerItem: snapShot.itemsSoldPerItem,
-            itemSoldObject,
-            collectionDate: moment(date).subtract(6, 'days')._d
-          });
+      if (res.data === []) return;
+      let index = NaN;
+      res.data[0].snapShot.forEach((snap, i) => {
+        if (snap.date === date) {
+          index = i;
         }
       });
+
+      const itemsSoldPerItem = res.data[0].snapShot[index].itemsSoldPerItem;
+      const collectionDate = moment(date).subtract(6, 'days')._d;
+
+      this.setState({ collectionsData, itemsSoldPerItem, collectionDate });
     });
   }
 
-  handleNumberOfItemsSold(collectionName, value, name) {
-    const { itemSoldObject } = this.state;
-    if (Object.keys(itemSoldObject).length === 0 && itemSoldObject.constructor === Object) {
-      itemSoldObject[collectionName] = {};
-    }
+  handleNumberOfItemsSold(value, name) {
+    const { itemsSoldPerItem } = this.state;
 
-    itemSoldObject[collectionName][name] = Number(value);
-    this.setState({ itemSoldObject });
-    this.totalItemsSold(collectionName);
+    itemsSoldPerItem.forEach((item, i) => {
+      console.log('name', item.item);
+      if (item.item === name) {
+        itemsSoldPerItem.splice(i, 1, { item: item.item, amount: Number(value) });
+      }
+    });
+    console.log(itemsSoldPerItem);
+    this.setState({ itemsSoldPerItem });
   }
 
-  numItemsSoldArray(collectionName) {
-    return Object.values(this.state.itemSoldObject[collectionName]);
+  numItemsSoldArray() {
+    const amountArray = this.state.itemsSoldPerItem.map(item => {
+      return item.amount;
+    });
+    return amountArray;
   }
 
   itemsSoldTotal(numItemsSoldArray) {
     return numItemsSoldArray.reduce((a, b) => a + b, 0);
   }
 
-  totalItemsSold(collectionName) {
-    const numItemsSoldArray = this.numItemsSoldArray(collectionName);
-    const itemsSoldTotal = this.itemsSoldTotal(numItemsSoldArray);
-    this.setState({ itemsSoldTotal, numItemsSoldArray });
-  }
-
   renderCollection() {
     const { collectionsData } = this.state;
-    //wait till the data is placed into state to renderCollections
+
     if (collectionsData.length === 0) return;
 
-    const { itemSoldObject, itemsSoldTotal, numItemsSoldArray } = this.state;
+    const numItemsSoldArray = this.numItemsSoldArray();
+    const itemsSoldTotal = this.itemsSoldTotal(numItemsSoldArray);
+    //wait till the data is placed into state to renderCollections
+
+    const { itemsSoldPerItem } = this.state;
     const { _id, collectionName, category, items } = collectionsData[0];
 
     return (
-      <div key={_id}>
+      <div style={{ marginBottom: '3rem' }} key={_id}>
         <HeaderDiv>
-          <HeaderH3>Collection Title: {collectionName}</HeaderH3>
-          <HeaderH5>Category: {category}</HeaderH5>
+          <h3 style={{ paddingTop: '2rem' }}>Collection Title: {collectionName}</h3>
+          <h5 style={{ paddingTop: '2rem' }}>Category: {category}</h5>
+          <h5 style={{ color: 'blue', paddingTop: '2rem' }}>{this.state.trendResMessage}</h5>
         </HeaderDiv>
 
         <HeaderDiv>{this.renderDateSelector()}</HeaderDiv>
@@ -167,12 +133,11 @@ class DetailedCollection extends Component {
           _id={_id}
           collectionName={collectionName}
           items={items}
-          itemSoldObject={itemSoldObject}
           itemsSoldTotal={itemsSoldTotal}
+          itemsSoldPerItem={itemsSoldPerItem}
           numItemsSoldArray={numItemsSoldArray}
           handleNumberOfItemsSold={this.handleNumberOfItemsSold.bind(this)}
         />
-        <h3 style={{ color: 'blue' }}>{this.state.trendResMessage}</h3>
         {this.renderButtons(items, collectionName)}
       </div>
     );
@@ -180,7 +145,6 @@ class DetailedCollection extends Component {
 
   renderDateSelector() {
     if (this.props.match.params.edit !== undefined) {
-      console.log(this.state.collectionsData);
       return (
         <div style={{ marginBottom: '5rem' }}>
           <h5>
@@ -247,7 +211,7 @@ class DetailedCollection extends Component {
 
     snapShot.date = m.add(6, 'days')._d;
     snapShot.costPercent = equations.totalCostPercent(items, numItemsSoldArray, itemsSoldTotal).toFixed(2);
-    snapShot.totalCost = equations.totalCost(itemsSoldTotal, items, numItemsSoldArray, itemsSoldTotal);
+    snapShot.totalCost = equations.totalCost(itemsSoldTotal, items, numItemsSoldArray, itemsSoldTotal).toFixed(2);
     snapShot.totalRevenue = equations.totalRevenue(itemsSoldTotal, items, numItemsSoldArray, itemsSoldTotal).toFixed(2);
     snapShot.totalMargin = equations.totalMargin(itemsSoldTotal, items, numItemsSoldArray, itemsSoldTotal).toFixed(2);
     snapShot.itemsSoldPerItem = this.state.itemsSoldPerItem;
@@ -257,15 +221,14 @@ class DetailedCollection extends Component {
   handleSnapShotSubmit(items, collectionName) {
     const url = '/api/collectionhistoricdata';
     const snapShot = this.createSnapShotObject(items);
-
-    const header = { collectionName, snapShot };
-    axios.post(url, header).then(res => {
+    console.log(snapShot);
+    const body = { collectionName, snapShot: snapShot };
+    axios.post(url, body).then(res => {
       this.setState({ trendResMessage: res.data.message });
     });
   }
 
   handleEditTrendItem(items, collectionName, date) {
-    console.log('edit');
     const url = `/api/collectionhistoricdata/edit/${this.state.id}`;
     const snapShot = this.createSnapShotObject(items);
     const body = { collectionName, date, snapShot };
@@ -278,6 +241,7 @@ class DetailedCollection extends Component {
   }
 
   render() {
+    console.log(this.state);
     return <div className="container">{this.renderCollection()}</div>;
   }
 }

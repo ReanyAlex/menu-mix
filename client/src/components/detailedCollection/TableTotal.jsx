@@ -26,7 +26,7 @@ const TableTotal = ({ items, itemsSoldTotal, numItemsSoldArray }) => {
         return (
           <TableData key={i}>
             {equation[0]}
-            {!isNaN(equation[1]) ? equation[1] : '0.00'}
+            {!isNaN(equation[1]) ? Number(equation[1]).toLocaleString('en', 'currency') : '0.00'}
             {equation[2]}
           </TableData>
         );

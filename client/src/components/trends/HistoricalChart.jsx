@@ -35,9 +35,9 @@ class HistoricalChart extends Component {
       data.forEach((snap, i) => {
         const m = moment(new Date(snap.date));
         const date = m.format('L');
+
         data[i].date = date;
       });
-
       this.setState({ data, name });
     });
   }
@@ -74,7 +74,7 @@ class HistoricalChart extends Component {
   renderChartLine() {
     const { filter } = this.state;
     if (filter === 'costPercent') {
-      return <Line type="monotone" name="Cost %" dataKey="costPercent" stroke="orange" strokeWidth="4" />;
+      return <Line type="monotone" name="Cost" dataKey="costPercent" stroke="orange" strokeWidth="4" />;
     } else if (filter === 'values') {
       return this.renderValueLines();
     } else if (filter === 'items') {
@@ -84,9 +84,9 @@ class HistoricalChart extends Component {
 
   renderValueLines() {
     const VALUELINES = [
-      { name: 'Total Cost $', dataKey: 'totalCost', color: 'red' },
-      { name: 'Total Margin $', dataKey: 'totalMargin', color: 'blue' },
-      { name: 'Total Revenue $', dataKey: 'totalRevenue', color: 'green' }
+      { name: 'Total Cost ', dataKey: 'totalCost', color: 'red' },
+      { name: 'Total Margin ', dataKey: 'totalMargin', color: 'blue' },
+      { name: 'Total Revenue ', dataKey: 'totalRevenue', color: 'green' }
     ];
 
     return VALUELINES.map(line => (
@@ -103,8 +103,12 @@ class HistoricalChart extends Component {
 
   renderItemLines() {
     const { data } = this.state;
+    /*shows the data for the last date instance of the collection.
+    Error if there is an edit to the item name. This will not be showcased
+    Also Major errors when switching out items in the collection  */
     return data[data.length - 1].itemsSoldPerItem.map((lineItem, i) => {
       const { _id, item } = lineItem;
+      console.log(item);
       return (
         <Line
           key={_id}
@@ -123,18 +127,42 @@ class HistoricalChart extends Component {
 
     if (this.state.filter === 'costPercent') unit = '%';
     if (this.state.filter === 'items') unit = '';
-
     return (
       <LineChart width={1000} height={600} data={this.state.data}>
         <XAxis dataKey="date" dy={10} />
         <YAxis unit={unit} />
         <CartesianGrid />
-        <Tooltip />
+        <Tooltip content={this.renderTooltip.bind(this)} />
+
         <Legend dy={30} />
 
         {this.renderChartLine()}
       </LineChart>
     );
+  }
+
+  renderTooltip(data) {
+    // console.log(this.state.data);
+    if (data.payload === null) return;
+    if (typeof data.payload[0] !== 'undefined') {
+      return (
+        <div key="1" style={{ background: 'white', padding: '1rem 1rem .5rem 1rem', border: '2px solid lightgray' }}>
+          <p style={{ fontSize: '1.15rem' }}>{data.label}</p>
+          {data.payload.map(payload => {
+            let display = `${payload.value.toLocaleString('en', { style: 'currency', currency: 'USD' })}`;
+
+            if (this.state.filter === 'costPercent') display = `%${payload.value}`;
+            if (this.state.filter === 'items') display = payload.value;
+
+            return (
+              <p key={payload.dataKey} style={{ color: `${payload.color}` }}>
+                {`${payload.name}: ${display}`}
+              </p>
+            );
+          })}
+        </div>
+      );
+    }
   }
 
   render() {

@@ -38,7 +38,12 @@ class NewMenuItems extends Component {
   };
 
   addOneNewItem() {
-    this.setState({ numberOfNewItems: this.state.numberOfNewItems + 1 });
+    const { numberOfNewItems, name, category, cost, price } = this.state;
+    name.push('');
+    category.push('');
+    cost.push('');
+    price.push('');
+    this.setState({ numberOfNewItems: numberOfNewItems + 1, name, category, cost, price });
   }
 
   handleOnChange(event, index) {

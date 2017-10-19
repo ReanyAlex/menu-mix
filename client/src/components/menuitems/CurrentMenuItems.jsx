@@ -104,8 +104,8 @@ class CurrentMenuItems extends Component {
     const ITEM_VALUES = [
       name,
       category,
-      `$${(cost / 100).toFixed(2)}`,
-      `$${(price / 100).toFixed(2)}`,
+      `$${(cost / 100).toFixed(2).toLocaleString('en', 'currency')}`,
+      `$${(price / 100).toFixed(2).toLocaleString('en', 'currency')}`,
       `${(cost / price * 100).toFixed(2)}%`
     ];
 

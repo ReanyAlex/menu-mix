@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+// import styled from 'styled-components';
 
 import TableHeader from './TableHeader';
 import TableRows from './TableRows';
@@ -9,11 +9,13 @@ const renderTable = (
   _id,
   collectionName,
   items,
-  itemSoldObject,
   itemsSoldTotal,
   numItemsSoldArray,
-  handleNumberOfItemsSold
+  handleNumberOfItemsSold,
+  itemsSoldPerItem
 ) => {
+  // console.log(itemsSoldPerItem);
+
   return (
     <table key={_id}>
       <TableHeader />
@@ -21,8 +23,8 @@ const renderTable = (
         <TableRows
           collectionName={collectionName}
           items={items}
-          itemSoldObject={itemSoldObject}
           itemsSoldTotal={itemsSoldTotal}
+          itemsSoldPerItem={itemsSoldPerItem}
           numItemsSoldArray={numItemsSoldArray}
           handleNumberOfItemsSold={handleNumberOfItemsSold}
         />
@@ -36,19 +38,19 @@ const DetailedCollectionTable = ({
   _id,
   collectionName,
   items,
-  itemSoldObject,
   itemsSoldTotal,
   numItemsSoldArray,
-  handleNumberOfItemsSold
+  handleNumberOfItemsSold,
+  itemsSoldPerItem
 }) => {
   return renderTable(
     _id,
     collectionName,
     items,
-    itemSoldObject,
     itemsSoldTotal,
     numItemsSoldArray,
-    handleNumberOfItemsSold
+    handleNumberOfItemsSold,
+    itemsSoldPerItem
   );
 };
 

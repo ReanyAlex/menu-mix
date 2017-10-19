@@ -25,7 +25,6 @@ class CurrentTrends extends Component {
     }
 
     return this.state.historicalData.map(collection => {
-      console.log(collection.snapShot.length);
       //if all data points have been deleted do not show collection untill a new data point has been added
       if (collection.snapShot.length === 0) {
         return '';
@@ -54,7 +53,6 @@ class CurrentTrends extends Component {
 
   handleTrendDelete(id) {
     const url = `/api/collectionhistoricdata/${id}`;
-    console.log(url);
     axios.delete(url).then(() => this.fetchHistoricalData());
   }
 

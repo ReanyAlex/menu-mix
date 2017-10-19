@@ -13,14 +13,16 @@ module.exports = {
     CollectionHistoricData.findOne({ collectionName }, function(error, data) {
       if (error) return;
       if (data === null) {
+        console.log('dataObject', dataObject.snapShot[0]);
         const newHistoricData = new CollectionHistoricData(dataObject);
+        console.log('newHistoricData', newHistoricData.snapShot[0]);
 
         newHistoricData.save();
         res.send({ message: `Trend created` });
       } else {
         //if counter is not zero it means that the date was found within the document
         let counter = 0;
-
+        console.log(data.snapShot);
         if (data.snapShot.length >= 1) {
           data.snapShot.forEach(snap => {
             const currentDates = moment(snapShot.date).format('L');
@@ -40,7 +42,7 @@ module.exports = {
           data.save();
           res.send({ message: `Added SnapShot to ${collectionName}` });
         } else {
-          res.send({ message: `SnapShot already exists for this date` });
+          res.send({ message: `SnapShot already exists for this date. You can edit the data under trends` });
         }
       }
     });

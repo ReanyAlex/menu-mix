@@ -14,27 +14,29 @@ const TableData = styled.td`
 const AmountInput = styled.input`width: 5rem;`;
 
 const itemAmountInput = (collectionName, name, nestedItem, handleNumberOfItemsSold) => {
+  // console.log(nestedItem);
   return (
     <AmountInput
       min="0"
       type="number"
       value={nestedItem}
-      onChange={e => handleNumberOfItemsSold(collectionName, e.target.value, name)}
+      onChange={e => handleNumberOfItemsSold(e.target.value, name)}
     />
   );
 };
 
 const TableRows = ({
+  itemsSoldPerItem,
   collectionName,
   items,
-  itemSoldObject,
   itemsSoldTotal,
   numItemsSoldArray,
   handleNumberOfItemsSold
 }) => {
   return items.map((item, i) => {
-    const { _id, name, cost, price } = item;
-    const nestedItem = itemSoldObject[collectionName][name];
+    const { _id, cost, price } = item;
+    const name = itemsSoldPerItem[i].item;
+    const nestedItem = itemsSoldPerItem[i].amount;
 
     const ITEM_EQUATIONS = equations.ITEM_EQUATIONS(
       name,
@@ -47,7 +49,8 @@ const TableRows = ({
       items,
       numItemsSoldArray,
       i,
-      itemsSoldTotal
+      itemsSoldTotal,
+      itemsSoldPerItem
     );
 
     return <tr key={_id}>{ITEM_EQUATIONS.map((equation, i) => <TableData key={i}>{equation}</TableData>)}</tr>;

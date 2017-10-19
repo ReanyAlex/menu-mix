@@ -55,7 +55,6 @@ class Settings extends Component {
   }
 
   renderFormFeilds() {
-    console.log('render');
     const FORM_DATA = [
       { type: 'text', value: 'companyName', displayed: 'Company' },
       { type: 'text', value: 'phoneNumber', displayed: 'Phone Number' },
