@@ -14,8 +14,6 @@ const renderTable = (
   handleNumberOfItemsSold,
   itemsSoldPerItem
 ) => {
-  // console.log(itemsSoldPerItem);
-
   return (
     <table key={_id}>
       <TableHeader />

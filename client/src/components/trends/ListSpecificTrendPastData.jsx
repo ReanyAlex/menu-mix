@@ -2,6 +2,43 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+
+const SnapShotHolder = styled.div`
+  position: relative;
+  padding: 0.5rem;
+  border-top: ${prompt => {
+    return prompt.switchStyle % 2 === 0 ? '1px solid black' : 'none';
+  }};
+  border-bottom: ${prompt => {
+    return prompt.switchStyle % 2 === 0 ? '1px solid black' : 'none';
+  }};
+  background: ${prompt => {
+    return prompt.switchStyle % 2 === 0 ? 'none' : 'lightgrey';
+  }};
+`;
+
+const SnapShotsLink = styled(Link)`
+  display: inline-block;
+  margin: 4px 0;
+  font-size: 1.25rem;
+`;
+
+const ButtonContainer = styled.span`
+  position: absolute;
+  right: -0.5rem;
+  bottom: 10px;
+`;
+
+const DeleteButton = styled.button`
+  margin-right: 10px;
+  display: inline-block;
+`;
+const EditButton = styled(Link)`
+  margin-right: 10px;
+  display: inline-block;
+`;
+
 class ListSpecificTrendPastData extends Component {
   state = {
     collectionName: '',
@@ -29,50 +66,42 @@ class ListSpecificTrendPastData extends Component {
   }
 
   handleDeleteTrendItem(date) {
-    console.log('delete');
     const { collectionName } = this.state;
     const url = `/api/collectionhistoricdata/removeoneTrend/${this.state.id}`;
     const body = { collectionName, date };
-    console.log(body);
-    axios.put(url, body).then(res => {
-      console.log(res.data.snapShot);
-      this.setState({ historicalData: res.data.snapShot });
-    });
+
+    axios.put(url, body).then(res => this.setState({ historicalData: res.data.snapShot }));
   }
 
   renderHistoricList() {
     return (
-      <ul>
-        {this.state.historicalData.map(snapShot => {
+      <div>
+        {this.state.historicalData.map((snapShot, i) => {
+          const EditPath = `/trends/individualhistorictrend/edit/${this.state.collectionName}/${this.state
+            .id}/${snapShot.date}`;
+
           return (
-            <li key={snapShot._id}>
-              <Link
+            <SnapShotHolder key={snapShot._id} switchStyle={i}>
+              <SnapShotsLink
                 to={`/trends/individualhistorictrend/${this.state.collectionName}/${this.state.id}/${snapShot.date}`}
               >
-                Week of{' '}
-                {moment(snapShot.date)
+                <span>{`Week of
+                ${moment(snapShot.date)
                   .subtract(6, 'days')
-                  .format('L')}
-              </Link>
-              <Link
-                to={`/trends/individualhistorictrend/edit/${this.state.collectionName}/${this.state
-                  .id}/${snapShot.date}`}
-                style={{ marginLeft: '2rem' }}
-                className="btn btn-warning"
-              >
-                Edit
-              </Link>
-              <button
-                style={{ marginLeft: '2rem' }}
-                className="btn btn-danger"
-                onClick={() => this.handleDeleteTrendItem(snapShot.date)}
-              >
-                Delete
-              </button>
-            </li>
+                  .format('L')}`}</span>
+              </SnapShotsLink>
+              <ButtonContainer>
+                <EditButton to={EditPath} className="btn btn-warning">
+                  Edit
+                </EditButton>
+                <DeleteButton className="btn btn-danger" onClick={() => this.handleDeleteTrendItem(snapShot.date)}>
+                  Delete
+                </DeleteButton>
+              </ButtonContainer>
+            </SnapShotHolder>
           );
         })}
-      </ul>
+      </div>
     );
   }
 

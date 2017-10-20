@@ -4,12 +4,27 @@ import axios from 'axios';
 import styled from 'styled-components';
 
 const CollectionHolder = styled.div`
+  position: relative;
   padding: 0.5rem;
-  margin: 0.25rem 0 0 0;
-  background: lightgrey;
+  border-top: ${prompt => {
+    return prompt.switchStyle % 2 === 0 ? '1px solid black' : 'none';
+  }};
+  border-bottom: ${prompt => {
+    return prompt.switchStyle % 2 === 0 ? '1px solid black' : 'none';
+  }};
+  background: ${prompt => {
+    return prompt.switchStyle % 2 === 0 ? 'none' : 'lightgrey';
+  }};
 `;
 
-const FloatRightSpan = styled.span`float: right;`;
+const CollectionTitle = styled.h3`margin: 4px;`;
+
+const FloatRightSpan = styled.span`
+  float: right;
+  position: absolute;
+  right: -15px;
+  bottom: 8px;
+`;
 
 const DeleteButton = styled.button`margin: 0 1rem 0 1rem;`;
 
@@ -20,7 +35,6 @@ const NewCollectionLink = styled(Link)`margin-top: 2rem;`;
 class CurrentCollections extends Component {
   state = {
     collectionsData: []
-    // itemSoldObject: {}
   };
 
   componentDidMount() {
@@ -36,16 +50,17 @@ class CurrentCollections extends Component {
       }
 
       const collectionsData = res.data;
-      // const { collectionName } = res.data[0];
-      // const itemSoldObject = {};
-      // itemSoldObject[collectionName] = {};
-
-      // res.data[0].items.map(item => {
-      //   return (itemSoldObject[collectionName][item.name] = 0);
-      // });
 
       this.setState({ collectionsData });
     });
+  }
+
+  deleteConformation(id) {
+    if (window.confirm('This will delete this collection. Are you sure?') === true) {
+      this.handleDelete(id);
+    } else {
+      return;
+    }
   }
 
   handleDelete(id) {
@@ -54,21 +69,21 @@ class CurrentCollections extends Component {
   }
 
   renderCollections() {
-    return this.state.collectionsData.map(collection => {
+    return this.state.collectionsData.map((collection, i) => {
       const { _id, collectionName } = collection;
       const ROOT_PATH = `/newcollection/${collectionName}/${_id}`;
 
       return (
-        <CollectionHolder key={_id}>
+        <CollectionHolder switchStyle={i} key={_id}>
           <CollectionLink to={ROOT_PATH}>
-            <h3>Collection Title: {collectionName}</h3>
+            <CollectionTitle>Collection Title: {collectionName}</CollectionTitle>
           </CollectionLink>
 
           <FloatRightSpan>
             <Link to={`${ROOT_PATH}/edit`} className="btn btn-warning">
               Edit
             </Link>
-            <DeleteButton className="btn btn-danger" onClick={() => this.handleDelete(_id)}>
+            <DeleteButton className="btn btn-danger" onClick={() => this.deleteConformation(_id)}>
               Delete
             </DeleteButton>
           </FloatRightSpan>

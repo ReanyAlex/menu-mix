@@ -4,22 +4,36 @@ import styled from 'styled-components';
 
 import EditItemForm from './EditItemForm';
 
+const SearchHolder = styled.div`margin-bottom: 1rem;`;
+
 const ItemHeaders = styled.span`
   text-decoration: underline;
-  width: 9rem;
+  width: ${props => props.width};
   display: inline-block;
-  margin-right: 0.5rem;
   font-size: 1.25rem;
-  padding-left: 0.5rem;
+`;
+
+const ItemHolder = styled.div`
+  position: relative;
+  padding: 0.5rem;
+  border-top: ${prompt => {
+    return prompt.switchStyle % 2 === 0 ? '1px solid black' : 'none';
+  }};
+  border-bottom: ${prompt => {
+    return prompt.switchStyle % 2 === 0 ? '1px solid black' : 'none';
+  }};
+  background: ${prompt => {
+    return prompt.switchStyle % 2 === 0 ? 'none' : 'lightgrey';
+  }};
 `;
 
 const ItemValues = styled.span`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 9rem;
+  width: ${props => props.width};
   display: inline-block;
-  margin-right: 0.5rem;
+  margin: 4px 0;
   font-size: 1.25rem;
 
   &:hover {
@@ -30,7 +44,7 @@ const ItemValues = styled.span`
 const ButtonContainer = styled.span`
   position: absolute;
   right: -0.5rem;
-  bottom: 0.25rem;
+  bottom: 10px;
 `;
 
 const Button = styled.button`
@@ -66,6 +80,14 @@ class CurrentMenuItems extends Component {
   }
 
   //delete item
+  deleteConformation(id) {
+    if (window.confirm('This will delete this item. Are you sure?') === true) {
+      this.handleDelete(id);
+    } else {
+      return;
+    }
+  }
+
   handleDelete(id) {
     const url = `/api/item/${id}`;
     axios.delete(url).then(() => this.fetchItemData());
@@ -81,9 +103,19 @@ class CurrentMenuItems extends Component {
   }
 
   renderHeader() {
-    const HEADER_VALUES = ['Name', 'Category', 'Cost', 'Sell Price', 'Item Cost'];
+    const HEADER_VALUES = [
+      { name: 'Name', width: '20rem' },
+      { name: 'Category', width: '15rem' },
+      { name: 'Cost', width: '6rem' },
+      { name: 'Sell Price', width: '6rem' },
+      { name: 'Item Cost', width: '6rem' }
+    ];
 
-    return HEADER_VALUES.map(value => <ItemHeaders key={value}>{value}</ItemHeaders>);
+    return HEADER_VALUES.map(value => (
+      <ItemHeaders width={value.width} key={value.name}>
+        {value.name}
+      </ItemHeaders>
+    ));
   }
 
   renderRows() {
@@ -100,28 +132,25 @@ class CurrentMenuItems extends Component {
   }
 
   renderItemValues({ _id, name, category, cost, price }, i) {
-    let style;
     const ITEM_VALUES = [
-      name,
-      category,
-      `$${(cost / 100).toFixed(2).toLocaleString('en', 'currency')}`,
-      `$${(price / 100).toFixed(2).toLocaleString('en', 'currency')}`,
-      `${(cost / price * 100).toFixed(2)}%`
+      { name: name, width: '20rem' },
+      { name: category, width: '15rem' },
+      { name: `$${(cost / 100).toFixed(2).toLocaleString('en', 'currency')}`, width: '6rem' },
+      { name: `$${(price / 100).toFixed(2).toLocaleString('en', 'currency')}`, width: '6rem' },
+      { name: `${(cost / price * 100).toFixed(2)}%`, width: '6rem' }
     ];
 
-    if (i % 2) {
-      style = { background: 'lightgrey', padding: '.5rem', position: 'relative' };
-    } else {
-      style = { padding: '.5rem', position: 'relative' };
-    }
-
     return (
-      <div key={_id} style={style}>
+      <ItemHolder key={_id} switchStyle={i}>
         {ITEM_VALUES.map((value, i) => {
-          return <ItemValues key={i}>{value}</ItemValues>;
+          return (
+            <ItemValues width={value.width} key={value.name}>
+              {value.name}
+            </ItemValues>
+          );
         })}
         {this.renderButtons(_id)}
-      </div>
+      </ItemHolder>
     );
   }
 
@@ -143,13 +172,12 @@ class CurrentMenuItems extends Component {
         </ButtonContainer>
       );
     }
-
     return (
       <ButtonContainer>
         <Button className="btn btn-warning" onClick={() => this.setState({ editId: _id })}>
           Edit
         </Button>
-        <Button className="btn btn-danger" onClick={() => this.handleDelete(_id)}>
+        <Button className="btn btn-danger" onClick={() => this.deleteConformation(_id)}>
           Delete
         </Button>
       </ButtonContainer>
@@ -159,10 +187,16 @@ class CurrentMenuItems extends Component {
   render() {
     return (
       <div className="container">
-        <h4>Current menu items:</h4>
-        <input type="text" placeholder="Search" aria-label="Search" onChange={e => this.updateSearch(e.target.value)} />
-        <br />
-        {this.renderHeader()}
+        <SearchHolder>
+          <h4>Current menu items:</h4>
+          <input
+            type="text"
+            placeholder="Search"
+            aria-label="Search"
+            onChange={e => this.updateSearch(e.target.value)}
+          />
+        </SearchHolder>
+        <div>{this.renderHeader()}</div>
         {this.renderRows()}
       </div>
     );

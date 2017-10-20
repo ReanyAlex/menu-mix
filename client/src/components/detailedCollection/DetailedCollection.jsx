@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import moment from 'moment';
 import styled from 'styled-components';
@@ -7,12 +8,21 @@ import equations from '../../helpers/detailedcollectionequtions';
 import Calender from '../collections/Calender';
 import DetailedCollectionTable from './DetailedCollectionTable';
 
+const DivContainer = styled.div`margin-bottom: 3rem;`;
+
 const HeaderDiv = styled.div`
   width: 45%;
   padding-left: 5%;
   float: left;
   display: inline-block;
 `;
+const Headers = styled.h3`
+  font-size: ${prompt => prompt.size};
+  color: ${prompt => prompt.color || 'black'};
+  padding-top: 2rem;
+`;
+
+const CalenderContainer = styled.div`margin-bottom: 5rem;`;
 
 const Button = styled.button`margin-top: 2rem;`;
 
@@ -28,10 +38,6 @@ class DetailedCollection extends Component {
     this.fetchCollection();
   }
 
-  // componentDidUpdate(prevProps, prevState) {
-  //   // this.itemsSoldPerItem();
-  // }
-
   reduceObject(object) {
     return Object.keys(object).reduce(function(previous, key) {
       return previous + object[key].amount;
@@ -42,18 +48,13 @@ class DetailedCollection extends Component {
     const { collection, id, date } = this.props.match.params;
     const url = `/api/collection/?collection=${collection}/&id=${id}`;
     axios.get(url).then(res => {
-      if (res.data.length === 0) {
-        return;
-      }
+      if (res.data.length === 0) return;
 
       const collectionsData = res.data;
 
       const itemsSoldPerItem = [];
 
-      res.data[0].items.forEach(item => {
-        console.log(item.name);
-        itemsSoldPerItem.push({ item: item.name, amount: 0 });
-      });
+      res.data[0].items.forEach(item => itemsSoldPerItem.push({ item: item.name, amount: 0 }));
 
       if (date !== undefined) {
         this.fetchHistory(collectionsData);
@@ -70,6 +71,7 @@ class DetailedCollection extends Component {
     axios.get(url).then(res => {
       if (res.data === []) return;
       let index = NaN;
+
       res.data[0].snapShot.forEach((snap, i) => {
         if (snap.date === date) {
           index = i;
@@ -87,19 +89,15 @@ class DetailedCollection extends Component {
     const { itemsSoldPerItem } = this.state;
 
     itemsSoldPerItem.forEach((item, i) => {
-      console.log('name', item.item);
-      if (item.item === name) {
-        itemsSoldPerItem.splice(i, 1, { item: item.item, amount: Number(value) });
-      }
+      if (item.item === name) itemsSoldPerItem.splice(i, 1, { item: item.item, amount: Number(value) });
     });
-    console.log(itemsSoldPerItem);
+
     this.setState({ itemsSoldPerItem });
   }
 
   numItemsSoldArray() {
-    const amountArray = this.state.itemsSoldPerItem.map(item => {
-      return item.amount;
-    });
+    const amountArray = this.state.itemsSoldPerItem.map(item => item.amount);
+
     return amountArray;
   }
 
@@ -110,21 +108,23 @@ class DetailedCollection extends Component {
   renderCollection() {
     const { collectionsData } = this.state;
 
+    //wait till the data is placed into state to renderCollections
     if (collectionsData.length === 0) return;
 
     const numItemsSoldArray = this.numItemsSoldArray();
     const itemsSoldTotal = this.itemsSoldTotal(numItemsSoldArray);
-    //wait till the data is placed into state to renderCollections
 
     const { itemsSoldPerItem } = this.state;
     const { _id, collectionName, category, items } = collectionsData[0];
 
     return (
-      <div style={{ marginBottom: '3rem' }} key={_id}>
+      <DivContainer key={_id}>
         <HeaderDiv>
-          <h3 style={{ paddingTop: '2rem' }}>Collection Title: {collectionName}</h3>
-          <h5 style={{ paddingTop: '2rem' }}>Category: {category}</h5>
-          <h5 style={{ color: 'blue', paddingTop: '2rem' }}>{this.state.trendResMessage}</h5>
+          <Headers size="1.5rem">Collection Title: {collectionName}</Headers>
+          <Headers size="1.15rem">Category: {category}</Headers>
+          <Headers size="1.15rem" color="blue">
+            {this.state.trendResMessage}
+          </Headers>
         </HeaderDiv>
 
         <HeaderDiv>{this.renderDateSelector()}</HeaderDiv>
@@ -139,27 +139,27 @@ class DetailedCollection extends Component {
           handleNumberOfItemsSold={this.handleNumberOfItemsSold.bind(this)}
         />
         {this.renderButtons(items, collectionName)}
-      </div>
+      </DivContainer>
     );
   }
 
   renderDateSelector() {
     if (this.props.match.params.edit !== undefined) {
       return (
-        <div style={{ marginBottom: '5rem' }}>
+        <CalenderContainer>
           <h5>
             {`Edit SnapShot for the week of: ${moment(this.props.match.params.date)
               .subtract(6, 'days')
               .format('L')}`}
           </h5>
-        </div>
+        </CalenderContainer>
       );
     }
     return (
       <form>
         <fieldset>
           <label>
-            <h5 style={{ paddingRight: '.5rem' }}>Date Selection:</h5>
+            <h5>Date Selection:</h5>
           </label>
           <Calender value={this.state.collectionDate} onDayClick={this.handleDateSelect.bind(this)} />
         </fieldset>
@@ -221,7 +221,6 @@ class DetailedCollection extends Component {
   handleSnapShotSubmit(items, collectionName) {
     const url = '/api/collectionhistoricdata';
     const snapShot = this.createSnapShotObject(items);
-    console.log(snapShot);
     const body = { collectionName, snapShot: snapShot };
     axios.post(url, body).then(res => {
       this.setState({ trendResMessage: res.data.message });
@@ -237,13 +236,12 @@ class DetailedCollection extends Component {
       .then(res => {
         this.setState({ historicalData: res.data.snapShot });
       })
-      .then(() => this.fetchCollection());
+      .then(() => this.props.history.push('/trends'));
   }
 
   render() {
-    console.log(this.state);
     return <div className="container">{this.renderCollection()}</div>;
   }
 }
 
-export default DetailedCollection;
+export default withRouter(DetailedCollection);

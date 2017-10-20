@@ -14,7 +14,6 @@ const TableData = styled.td`
 const AmountInput = styled.input`width: 5rem;`;
 
 const itemAmountInput = (collectionName, name, nestedItem, handleNumberOfItemsSold) => {
-  // console.log(nestedItem);
   return (
     <AmountInput
       min="0"
@@ -52,7 +51,6 @@ const TableRows = ({
       itemsSoldTotal,
       itemsSoldPerItem
     );
-
     return <tr key={_id}>{ITEM_EQUATIONS.map((equation, i) => <TableData key={i}>{equation}</TableData>)}</tr>;
   });
 };

@@ -39,6 +39,7 @@ class NewMenuItems extends Component {
 
   addOneNewItem() {
     const { numberOfNewItems, name, category, cost, price } = this.state;
+    //push a new element on to the array to handle newly added react inputs
     name.push('');
     category.push('');
     cost.push('');
